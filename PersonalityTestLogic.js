@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from "react";
 
 export function usePersonalityTest() {
     const [questionsData, setQuestionsData] = useState([]);
-    const [currentPage, setCurrentPage] = useState(0);  // Start from the first page every time
-    const [answers, setAnswers] = useState([]);  // Start with no answers every time
+    const [currentPage, setCurrentPage] = useState(0);  // Always start from page 0
+    const [answers, setAnswers] = useState([]);  // Start with an empty array for answers
     const [error, setError] = useState(null);
     const questionRefs = useRef([]);
     const nextButtonRef = useRef(null);
@@ -18,9 +18,8 @@ export function usePersonalityTest() {
             })
             .then((data) => {
                 setQuestionsData(data);
-                if (answers.length === 0) {
-                    setAnswers(Array(data.length).fill(null));
-                }
+                // Initialize the answers array when data is loaded
+                setAnswers(Array(data.length).fill(null));
             })
             .catch((error) => {
                 console.error("Error fetching questions data:", error);
@@ -33,9 +32,6 @@ export function usePersonalityTest() {
             .fill(undefined)
             .map((_, i) => questionRefs.current[i] || React.createRef());
     }, [questionsData.length]);
-
-    // Removed localStorage effect
-    // This ensures that the progress and answers are not saved
 
     const handleAnswer = (questionIndex, value) => {
         const newAnswers = [...answers];
@@ -102,11 +98,11 @@ export function usePersonalityTest() {
         const secondaryTrait = traitsOrder[1];
 
         const archetypes = {
-            "O": "Labyrinth",
-            "C": "Shield",
-            "E": "Helm",
-            "A": "Olive Branch",
-            "N": "Lyre",
+            O: "Labyrinth",
+            C: "Shield",
+            E: "Helm",
+            A: "Olive Branch",
+            N: "Lyre",
             // Add mappings for remaining archetypes
         };
 
