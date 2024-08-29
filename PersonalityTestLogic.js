@@ -2,14 +2,8 @@ import { useState, useEffect, useRef } from "react";
 
 export function usePersonalityTest() {
     const [questionsData, setQuestionsData] = useState([]);
-    const [currentPage, setCurrentPage] = useState(() => {
-        const savedPage = localStorage.getItem("currentPage");
-        return savedPage !== null ? JSON.parse(savedPage) : 0;
-    });
-    const [answers, setAnswers] = useState(() => {
-        const savedAnswers = localStorage.getItem("answers");
-        return savedAnswers !== null ? JSON.parse(savedAnswers) : [];
-    });
+    const [currentPage, setCurrentPage] = useState(0);  // Start from the first page every time
+    const [answers, setAnswers] = useState([]);  // Start with no answers every time
     const [error, setError] = useState(null);
     const questionRefs = useRef([]);
     const nextButtonRef = useRef(null);
@@ -40,10 +34,8 @@ export function usePersonalityTest() {
             .map((_, i) => questionRefs.current[i] || React.createRef());
     }, [questionsData.length]);
 
-    useEffect(() => {
-        localStorage.setItem("currentPage", JSON.stringify(currentPage));
-        localStorage.setItem("answers", JSON.stringify(answers));
-    }, [currentPage, answers]);
+    // Removed localStorage effect
+    // This ensures that the progress and answers are not saved
 
     const handleAnswer = (questionIndex, value) => {
         const newAnswers = [...answers];
@@ -135,7 +127,6 @@ export function usePersonalityTest() {
         handleAnswer,
         handleNext,
         allAnswered,
-        progress: Math.round((answers.filter((answer) => answer !== null).length / questionsData.length) * 100),
         startIndex,
         endIndex,
         questionRefs,
