@@ -2,20 +2,40 @@ import { useState, useEffect, useRef } from "react";
 
 export function usePersonalityTest() {
     const [questionsData, setQuestionsData] = useState([]);
-    const [currentPage, setCurrentPage] = useState(0);
-    const [answers, setAnswers] = useState([]);
+    const [currentPage, setCurrentPage] = useState(() => {
+        // Load current page from localStorage, default to 0
+        const savedPage = localStorage.getItem("currentPage");
+        return savedPage !== null ? JSON.parse(savedPage) : 0;
+    });
+    const [answers, setAnswers] = useState(() => {
+        // Load answers from localStorage, default to an empty array
+        const savedAnswers = localStorage.getItem("answers");
+        return savedAnswers !== null ? JSON.parse(savedAnswers) : [];
+    });
+    const [error, setError] = useState(null); // Error state
     const questionRefs = useRef([]);
     const nextButtonRef = useRef(null);
 
     useEffect(() => {
         // Fetch the JSON data
         fetch("https://sendn00ts.github.io/CatharsisPersonalityTest/PersonalityTestQuestions.json")
-            .then((response) => response.json())
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
             .then((data) => {
                 setQuestionsData(data);
-                setAnswers(Array(data.length).fill(null));
+                // Initialize answers array if it's empty
+                if (answers.length === 0) {
+                    setAnswers(Array(data.length).fill(null));
+                }
             })
-            .catch((error) => console.error("Error fetching questions data:", error));
+            .catch((error) => {
+                console.error("Error fetching questions data:", error);
+                setError("Failed to load questions. Please try again later.");
+            });
     }, []);
 
     useEffect(() => {
@@ -24,6 +44,12 @@ export function usePersonalityTest() {
             .fill(undefined)
             .map((_, i) => questionRefs.current[i] || React.createRef());
     }, [questionsData.length]);
+
+    useEffect(() => {
+        // Persist current page and answers to localStorage
+        localStorage.setItem("currentPage", JSON.stringify(currentPage));
+        localStorage.setItem("answers", JSON.stringify(answers));
+    }, [currentPage, answers]);
 
     const handleAnswer = (questionIndex, value) => {
         const newAnswers = [...answers];
@@ -68,6 +94,7 @@ export function usePersonalityTest() {
         endIndex,
         questionRefs,
         nextButtonRef,
-        totalPages
+        totalPages,
+        error // Include error state in return value
     };
 }
