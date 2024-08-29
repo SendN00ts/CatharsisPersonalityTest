@@ -19,7 +19,7 @@ export function usePersonalityTest() {
             .then((data) => {
                 setQuestionsData(data);
                 // Initialize the answers array when data is loaded
-                setAnswers(Array(data.length).fill(null));
+                setAnswers(Array(data.length).fill(null)); // Ensure answers is initialized correctly
             })
             .catch((error) => {
                 console.error("Error fetching questions data:", error);
@@ -130,5 +130,6 @@ export function usePersonalityTest() {
         totalPages,
         error,
         calculateResults,
+        answers, // Ensure answers is returned here
     };
 }
