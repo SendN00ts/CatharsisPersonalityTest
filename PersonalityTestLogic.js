@@ -1,36 +1,25 @@
 import { useState, useEffect, useRef } from "react";
 
-export function usePersonalityTest() {
+export const usePersonalityTest = () => {
     const [questionsData, setQuestionsData] = useState([]);
+    const [answers, setAnswers] = useState(Array(questionsData.length).fill(null));
     const [currentPage, setCurrentPage] = useState(0);
-    const [answers, setAnswers] = useState([]);
     const [error, setError] = useState(null);
-    const questionRefs = useRef([]);
-    const nextButtonRef = useRef(null);
+    
+    const traits = {
+        Openness: 0,
+        Conscientiousness: 0,
+        Extraversion: 0,
+        Agreeableness: 0,
+        Neuroticism: 0,
+    };
 
     useEffect(() => {
         fetch("https://sendn00ts.github.io/CatharsisPersonalityTest/PersonalityTestQuestions.json")
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                return response.json();
-            })
-            .then((data) => {
-                setQuestionsData(data);
-                setAnswers(Array(data.length).fill(null)); // Initialize answers array
-            })
-            .catch((error) => {
-                console.error("Error fetching questions data:", error);
-                setError("Failed to load questions. Please try again later.");
-            });
+            .then(response => response.json())
+            .then(data => setQuestionsData(data))
+            .catch(error => setError(error));
     }, []);
-
-    useEffect(() => {
-        questionRefs.current = Array(questionsData.length)
-            .fill(undefined)
-            .map((_, i) => questionRefs.current[i] || React.createRef());
-    }, [questionsData.length]);
 
     const handleAnswer = (questionIndex, value) => {
         const newAnswers = [...answers];
@@ -38,91 +27,67 @@ export function usePersonalityTest() {
         setAnswers(newAnswers);
     };
 
-    const handleNext = () => {
-        if (currentPage < totalPages - 1) {
-            setCurrentPage(currentPage + 1);
-        }
-    };
-
-    const questionsPerPage = 6;
-    const totalPages = Math.ceil(questionsData.length / questionsPerPage);
-
-    const allAnswered = answers
-        .slice(
-            currentPage * questionsPerPage,
-            (currentPage + 1) * questionsPerPage
-        )
-        .every((answer) => answer !== null);
-
-    const startIndex = currentPage * questionsPerPage;
-    const endIndex = Math.min(
-        startIndex + questionsPerPage,
-        questionsData.length
-    );
-
-    // Example trait weights: Positive and Negative
-    const traitWeights = [
-        { questionIndex: 0, traits: { O: 1 } },  // Example: Openness-positive
-        { questionIndex: 1, traits: { O: 1 } },  // Example: Openness-positive
-        { questionIndex: 10, traits: { C: -1 } }, // Example: Conscientiousness-negative
-        // Add more mappings according to your questions
-    ];
-
-    const calculateScores = () => {
-        const scores = { O: 0, C: 0, E: 0, A: 0, N: 0 };
-
+    const calculateResults = () => {
         answers.forEach((answer, index) => {
             if (answer !== null) {
-                const weight = traitWeights.find(w => w.questionIndex === index);
-                if (weight) {
-                    for (const trait in weight.traits) {
-                        scores[trait] += answer * weight.traits[trait];
-                    }
+                const question = questionsData[index];
+                const trait = question.trait; // Assume each question has a `trait` key
+                const weight = question.weight; // Assume each question has a `weight` key
+                
+                // Adjust the trait values based on the user's answer
+                switch (trait) {
+                    case "Openness":
+                        traits.Openness += answer * weight;
+                        break;
+                    case "Conscientiousness":
+                        traits.Conscientiousness += answer * weight;
+                        break;
+                    case "Extraversion":
+                        traits.Extraversion += answer * weight;
+                        break;
+                    case "Agreeableness":
+                        traits.Agreeableness += answer * weight;
+                        break;
+                    case "Neuroticism":
+                        traits.Neuroticism += answer * weight;
+                        break;
+                    default:
+                        break;
                 }
             }
         });
 
-        return scores;
+        // Determine the archetype based on the calculated traits
+        const archetype = determineArchetype(traits);
+        return archetype;
     };
 
-    const determineArchetypes = (scores) => {
-        const traitsOrder = Object.keys(scores).sort((a, b) => scores[b] - scores[a]);
+    const determineArchetype = (traits) => {
+        const { Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism } = traits;
 
-        const primaryTrait = traitsOrder[0];
-        const secondaryTrait = traitsOrder[1];
-
-        const archetypes = {
-            O: "Labyrinth",
-            C: "Shield",
-            E: "Helm",
-            A: "Olive Branch",
-            N: "Lyre",
-        };
-
-        return {
-            primary: archetypes[primaryTrait],
-            secondary: archetypes[secondaryTrait],
-        };
-    };
-
-    const calculateResults = () => {
-        const scores = calculateScores();
-        return determineArchetypes(scores);
+        if (Openness < 20 && Conscientiousness > 30 && Extraversion < 20 && Agreeableness > 30 && Neuroticism < 20) {
+            return { primary: "Shield", secondary: null };
+        } else if (Openness > 30 && Conscientiousness < 20 && Agreeableness > 30 && Neuroticism > 30) {
+            return { primary: "Labyrinth", secondary: null };
+        } else if (Openness >= 20 && Openness <= 30 && Conscientiousness > 30 && Extraversion > 30 && Agreeableness > 30 && Neuroticism < 20) {
+            return { primary: "Olive Branch", secondary: null };
+        } else if (Openness > 30 && Conscientiousness < 20 && Extraversion < 20 && Agreeableness <= 20 && Neuroticism > 20) {
+            return { primary: "Scroll", secondary: null };
+        } else if (Openness >= 20 && Openness <= 30 && Conscientiousness >= 20 && Conscientiousness <= 30 && Extraversion > 30 && Agreeableness > 30 && Neuroticism < 20) {
+            return { primary: "Lyre", secondary: null };
+        } else if (Openness < 20 && Conscientiousness >= 20 && Extraversion > 30 && Agreeableness < 20 && Neuroticism <= 20) {
+            return { primary: "Spear", secondary: null };
+        } else {
+            return { primary: "Unknown", secondary: null };
+        }
     };
 
     return {
         questionsData,
+        answers,
         currentPage,
         handleAnswer,
-        handleNext,
-        allAnswered,
-        startIndex,
-        endIndex,
-        questionRefs,
-        nextButtonRef,
-        totalPages,
-        error,
         calculateResults,
-        answers,
+        error,
     };
-}
+};
