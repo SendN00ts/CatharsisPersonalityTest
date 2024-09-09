@@ -1,172 +1,250 @@
-import { useState, useEffect } from 'react';
+import React, { useEffect, useState } from "react"
+import { PersonalityTestAnswerScale } from "https://framer.com/m/PersonalityTestAnswerScale-fuRt.js@4Ep4xIjzN1bhp9ZzseIF"
+import { usePersonalityTest } from "https://sendn00ts.github.io/CatharsisPersonalityTest/PersonalityTestLogic.js"
 
-export function usePersonalityTest() {
-    const [answers, setAnswers] = useState(Array(50).fill(null)); // Example for 50 questions
-    const [traits, setTraits] = useState({
-        Openness: 0,
-        Conscientiousness: 0,
-        Extraversion: 0,
-        Agreeableness: 0,
-        Neuroticism: 0,
-    });
+export function PersonalityTest() {
+    const [questionsData, setQuestionsData] = useState([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
+    const [currentPage, setCurrentPage] = useState(0)
+    const questionsPerPage = 6
 
-    const handleAnswer = (questionIndex, value) => {
-        const newAnswers = [...answers];
-        newAnswers[questionIndex] = value;
-        setAnswers(newAnswers);
+    const {
+        handleAnswer,
+        questionRefs = { current: [] },
+        nextButtonRef,
+        calculateResults,
+        answers = [],
+    } = usePersonalityTest() || {}
 
-        updateTraits(questionIndex, value);
-    };
-
-    const updateTraits = (questionIndex, value) => {
-        const updatedTraits = { ...traits };
-
-        // Add logic to update traits based on the question and value
-        if (questionIndex >= 0 && questionIndex <= 9) {
-            updatedTraits.Openness += value - 3;
-        } else if (questionIndex >= 10 && questionIndex <= 19) {
-            updatedTraits.Conscientiousness += value - 3;
-        } else if (questionIndex >= 20 && questionIndex <= 29) {
-            updatedTraits.Extraversion += value - 3;
-        } else if (questionIndex >= 30 && questionIndex <= 39) {
-            updatedTraits.Agreeableness += value - 3;
-        } else if (questionIndex >= 40 && questionIndex <= 49) {
-            updatedTraits.Neuroticism += value - 3;
-        }
-
-        setTraits(updatedTraits);
-    };
-
-    function calculateResults(traits) {
-        const { openness, conscientiousness, extraversion, agreeableness, neuroticism } = traits;
-
-        const archetypes = [
-            {
-                name: "Labyrinth",
-                thresholds: {
-                    openness: "high",
-                    conscientiousness: "low",
-                    extraversion: "lowOrHigh",
-                    agreeableness: "high",
-                    neuroticism: "high",
-                },
-            },
-            {
-                name: "Shield",
-                thresholds: {
-                    openness: "low",
-                    conscientiousness: "high",
-                    extraversion: "low",
-                    agreeableness: "moderateToHigh",
-                    neuroticism: "low",
-                },
-            },
-            {
-                name: "Helm",
-                thresholds: {
-                    openness: "high",
-                    conscientiousness: "high",
-                    extraversion: "high",
-                    agreeableness: "moderate",
-                    neuroticism: "low",
-                },
-            },
-            {
-                name: "Olive Branch",
-                thresholds: {
-                    openness: "moderate",
-                    conscientiousness: "high",
-                    extraversion: "high",
-                    agreeableness: "high",
-                    neuroticism: "low",
-                },
-            },
-            {
-                name: "Papyros",
-                thresholds: {
-                    openness: "high",
-                    conscientiousness: "low",
-                    extraversion: "low",
-                    agreeableness: "lowToModerate",
-                    neuroticism: "moderateToHigh",
-                },
-            },
-            {
-                name: "Lyra",
-                thresholds: {
-                    openness: "moderate",
-                    conscientiousness: "moderate",
-                    extraversion: "high",
-                    agreeableness: "high",
-                    neuroticism: "low",
-                },
-            },
-            {
-                name: "Dory",
-                thresholds: {
-                    openness: "low",
-                    conscientiousness: "moderateToHigh",
-                    extraversion: "high",
-                    agreeableness: "low",
-                    neuroticism: "lowToModerate",
-                },
-            },
-            {
-                name: "Estia",
-                thresholds: {
-                    openness: "low",
-                    conscientiousness: "low",
-                    extraversion: "low",
-                    agreeableness: "moderateToHigh",
-                    neuroticism: "low",
-                },
-            },
-        ];
-
-        // Helper function to determine if the trait is in the correct range for the archetype
-        function isTraitMatch(traitScore, traitThreshold) {
-            if (traitThreshold === "high") {
-                return traitScore >= 5;
-            } else if (traitThreshold === "moderate") {
-                return traitScore >= 3 && traitScore <= 4;
-            } else if (traitThreshold === "low") {
-                return traitScore <= 2;
-            } else if (traitThreshold === "lowOrHigh") {
-                return traitScore <= 2 || traitScore >= 5;
-            } else if (traitThreshold === "moderateToHigh") {
-                return traitScore >= 3;
-            } else if (traitThreshold === "lowToModerate") {
-                return traitScore <= 3;
-            }
-            return false;
-        }
-
-        // Logic to determine the best-matching archetype
-        let bestMatch = null;
-        let highestScore = -Infinity;
-
-        for (const archetype of archetypes) {
-            const thresholds = archetype.thresholds;
-            let matchScore = 0;
-
-            if (isTraitMatch(openness, thresholds.openness)) matchScore++;
-            if (isTraitMatch(conscientiousness, thresholds.conscientiousness)) matchScore++;
-            if (isTraitMatch(extraversion, thresholds.extraversion)) matchScore++;
-            if (isTraitMatch(agreeableness, thresholds.agreeableness)) matchScore++;
-            if (isTraitMatch(neuroticism, thresholds.neuroticism)) matchScore++;
-
-            if (matchScore > highestScore) {
-                highestScore = matchScore;
-                bestMatch = archetype.name;
+    useEffect(() => {
+        async function fetchQuestions() {
+            try {
+                const response = await fetch(
+                    "https://sendn00ts.github.io/CatharsisPersonalityTest/PersonalityTestQuestions.json"
+                )
+                if (!response.ok) {
+                    throw new Error("Failed to fetch questions data")
+                }
+                const data = await response.json()
+                setQuestionsData(data)
+                setIsLoading(false)
+            } catch (error) {
+                console.error(error)
+                setError("Failed to load questions. Please try again later.")
+                setIsLoading(false)
             }
         }
+        fetchQuestions()
+    }, [])
 
-        return { primary: bestMatch }; // Always return the best match
+    useEffect(() => {
+        const link = document.createElement("link")
+        link.href =
+            "https://fonts.googleapis.com/css2?family=Raleway:wght@400&display=swap"
+        link.rel = "stylesheet"
+        document.head.appendChild(link)
+    }, [])
+
+    const startIndex = currentPage * questionsPerPage
+    const endIndex = Math.min(
+        startIndex + questionsPerPage,
+        questionsData.length
+    )
+
+    // Determine if all questions on the current page are answered
+    const allAnsweredOnPage = answers
+        .slice(startIndex, endIndex)
+        .every((answer) => answer !== null)
+
+    // Scroll to the top of the next page when changing pages
+    const handleNextWithScroll = () => {
+        if (
+            currentPage <
+            Math.ceil(questionsData.length / questionsPerPage) - 1
+        ) {
+            setCurrentPage(currentPage + 1)
+            window.scrollTo({ top: 0, behavior: "smooth" }) // Scroll to top of page
+        }
     }
 
-    return {
-        answers,
-        handleAnswer,
-        calculateResults,
-    };
+    const handleShowResults = () => {
+        if (typeof calculateResults === "function") {
+            const result = calculateResults() || {}  // Defensive programming, handle null/undefined result
+            const { primary } = result || {}; // Safely destructure 'primary' from result
+
+            if (!primary) {
+                console.error("No archetype found or calculation failed.")
+                return;
+            }
+
+            const archetypeUrls = {
+                Labyrinth:
+                    "https://tiny-slides-700893.framer.app/resultlabyrinthos",
+                Shield: "https://tiny-slides-700893.framer.app/resultaspida",
+                Helm: "https://tiny-slides-700893.framer.app/resultkyvernitis",
+                "Olive Branch":
+                    "https://tiny-slides-700893.framer.app/resultkladoselaias",
+                Lyre: "https://tiny-slides-700893.framer.app/resultlyra",
+                Papyros: "https://tiny-slides-700893.framer.app/resultpapyros",
+                Dory: "https://tiny-slides-700893.framer.app/resultdory",
+                Estia: "https://tiny-slides-700893.framer.app/resultestia",
+            }
+
+            const redirectTo = archetypeUrls[primary]
+
+            if (redirectTo) {
+                window.location.href = redirectTo // Redirect to the result page
+            } else {
+                console.error("No URL found for the calculated archetype.")
+            }
+        } else {
+            console.error("calculateResults is not a function or is undefined")
+        }
+    }
+
+    if (error) {
+        return (
+            <div style={{ padding: "20px", textAlign: "center", color: "red" }}>
+                <p>{error}</p>
+            </div>
+        )
+    }
+
+    if (isLoading) {
+        return (
+            <div style={{ padding: "20px", textAlign: "center" }}>
+                <p>Loading the personality test...</p>
+            </div>
+        )
+    }
+
+    const totalAnsweredQuestions = answers.filter(
+        (answer) => answer !== null
+    ).length
+    const totalQuestions = questionsData.length
+    const progressPercentage = totalQuestions
+        ? Math.round((totalAnsweredQuestions / totalQuestions) * 100)
+        : 0
+
+    return (
+        <div
+            style={{
+                padding: "20px",
+                textAlign: "center",
+                fontFamily: "'Raleway', sans-serif",
+                fontWeight: "400",
+            }}
+        >
+            {/* Progress bar */}
+            <div style={{ marginBottom: "20px", width: "100%" }}>
+                <div
+                    style={{
+                        height: "20px",
+                        backgroundColor: "#e0e0e0",
+                        borderRadius: "10px",
+                        overflow: "hidden",
+                    }}
+                >
+                    <div
+                        style={{
+                            height: "100%",
+                            width: `${progressPercentage}%`,
+                            backgroundColor: "#76c7c0",
+                            transition: "width 0.5s ease",
+                        }}
+                    ></div>
+                </div>
+                <p
+                    style={{
+                        marginTop: "10px",
+                        fontWeight: "bold",
+                        color: "#343a40",
+                    }}
+                >
+                    {progressPercentage}% completed
+                </p>
+            </div>
+
+            {/* Render the questions */}
+            {questionsData
+                .slice(startIndex, endIndex)
+                .map((questionItem, index) => (
+                    <div
+                        key={startIndex + index}
+                        ref={questionRefs.current[startIndex + index]}
+                        style={{ marginBottom: "60px" }}
+                    >
+                        <PersonalityTestAnswerScale
+                            question={questionItem.Question}
+                            questionIndex={startIndex + index}
+                            answers={questionItem.Answers}
+                            onAnswer={handleAnswer}
+                            nextRef={
+                                index === 5
+                                    ? nextButtonRef
+                                    : questionRefs.current[
+                                          startIndex + index + 1
+                                      ]
+                            }
+                        />
+                    </div>
+                ))}
+
+            {currentPage < Math.ceil(totalQuestions / questionsPerPage) - 1 ? (
+                <button
+                    ref={nextButtonRef}
+                    onClick={handleNextWithScroll}
+                    disabled={!allAnsweredOnPage} // Disable Next button if not all answered
+                    style={{
+                        padding: "15px 30px",
+                        marginTop: "20px",
+                        fontSize: "18px",
+                        background: allAnsweredOnPage ? "#007bff" : "#d3d3d3",
+                        color: "#ffffff",
+                        border: "none",
+                        borderRadius: "30px",
+                        cursor: allAnsweredOnPage ? "pointer" : "not-allowed",
+                        transition: "background 0.3s ease",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        margin: "0 auto",
+                    }}
+                >
+                    Next
+                    <span
+                        style={{
+                            marginLeft: "10px",
+                            display: "inline-block",
+                            transition: "transform 0.3s ease",
+                        }}
+                    >
+                        ➔
+                    </span>
+                </button>
+            ) : (
+                <button
+                    onClick={handleShowResults}
+                    style={{
+                        padding: "15px 30px",
+                        marginTop: "20px",
+                        fontSize: "18px",
+                        background: "#007bff",
+                        color: "#ffffff",
+                        border: "none",
+                        borderRadius: "30px",
+                        cursor: "pointer",
+                        transition: "background 0.3s ease",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        margin: "0 auto",
+                    }}
+                >
+                    Show Results
+                </button>
+            )}
+        </div>
+    )
 }
