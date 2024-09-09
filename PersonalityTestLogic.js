@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState } from 'react';
 
 export function usePersonalityTest() {
-    const [answers, setAnswers] = useState(Array(50).fill(null));
+    const [answers, setAnswers] = useState(Array(50).fill(null)); // Example for 50 questions
     const [traits, setTraits] = useState({
         Openness: 0,
         Conscientiousness: 0,
@@ -14,13 +14,14 @@ export function usePersonalityTest() {
         const newAnswers = [...answers];
         newAnswers[questionIndex] = value;
         setAnswers(newAnswers);
+
         updateTraits(questionIndex, value);
     };
 
     const updateTraits = (questionIndex, value) => {
         const updatedTraits = { ...traits };
 
-        // Mapping question ranges to traits
+        // Trait calculation logic, adjust ranges as per the new design
         if (questionIndex >= 0 && questionIndex <= 9) {
             updatedTraits.Openness += value - 3;
         } else if (questionIndex >= 10 && questionIndex <= 19) {
@@ -36,10 +37,10 @@ export function usePersonalityTest() {
         setTraits(updatedTraits);
     };
 
-    const calculateResults = () => {
+    function calculateResults() {
         const { Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism } = traits;
 
-        // Define archetypes and their trait thresholds
+        // Define the trait thresholds for each archetype
         const archetypes = [
             {
                 name: "Labyrinth",
@@ -72,7 +73,7 @@ export function usePersonalityTest() {
                 },
             },
             {
-                name: "Olive Branch",
+                name: "OliveBranch",
                 thresholds: {
                     Openness: "moderate",
                     Conscientiousness: "high",
@@ -123,19 +124,28 @@ export function usePersonalityTest() {
             },
         ];
 
-        // Matching logic for archetypes
-        const isTraitMatch = (traitScore, threshold) => {
-            if (threshold === "high") return traitScore >= 5;
-            if (threshold === "low") return traitScore <= 2;
-            if (threshold === "moderate") return traitScore >= 3 && traitScore <= 4;
-            if (threshold === "lowOrHigh") return traitScore <= 2 || traitScore >= 5;
-            if (threshold === "moderateToHigh") return traitScore >= 3;
-            if (threshold === "lowToModerate") return traitScore <= 3;
+        // Helper function to determine if the trait is in the correct range for the archetype
+        function isTraitMatch(traitScore, traitThreshold) {
+            if (traitThreshold === "high") {
+                return traitScore >= 5;
+            } else if (traitThreshold === "moderate") {
+                return traitScore >= 3 && traitScore <= 4;
+            } else if (traitThreshold === "low") {
+                return traitScore <= 2;
+            } else if (traitThreshold === "lowOrHigh") {
+                return traitScore <= 2 || traitScore >= 5;
+            } else if (traitThreshold === "moderateToHigh") {
+                return traitScore >= 3;
+            } else if (traitThreshold === "lowToModerate") {
+                return traitScore <= 3;
+            }
             return false;
-        };
+        }
 
+        // Loop through archetypes to find the best match
         for (const archetype of archetypes) {
             const thresholds = archetype.thresholds;
+
             if (
                 isTraitMatch(Openness, thresholds.Openness) &&
                 isTraitMatch(Conscientiousness, thresholds.Conscientiousness) &&
@@ -143,12 +153,12 @@ export function usePersonalityTest() {
                 isTraitMatch(Agreeableness, thresholds.Agreeableness) &&
                 isTraitMatch(Neuroticism, thresholds.Neuroticism)
             ) {
-                return { primary: archetype.name };
+                return { primary: archetype.name }; // Return the matched archetype
             }
         }
 
-        return null;
-    };
+        return null; // No archetype matched
+    }
 
     return {
         answers,
