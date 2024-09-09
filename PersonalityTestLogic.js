@@ -1,93 +1,75 @@
-import { useState, useEffect, useRef } from "react";
-
-export const usePersonalityTest = () => {
-    const [questionsData, setQuestionsData] = useState([]);
-    const [answers, setAnswers] = useState(Array(questionsData.length).fill(null));
-    const [currentPage, setCurrentPage] = useState(0);
+export function usePersonalityTest() {
+    const [answers, setAnswers] = useState(Array(50).fill(null)); // Assume 50 questions
     const [error, setError] = useState(null);
     
-    const traits = {
+    // Traits state
+    const [traits, setTraits] = useState({
         Openness: 0,
         Conscientiousness: 0,
         Extraversion: 0,
         Agreeableness: 0,
-        Neuroticism: 0,
-    };
-
-    useEffect(() => {
-        fetch("https://sendn00ts.github.io/CatharsisPersonalityTest/PersonalityTestQuestions.json")
-            .then(response => response.json())
-            .then(data => setQuestionsData(data))
-            .catch(error => setError(error));
-    }, []);
+        Neuroticism: 0
+    });
 
     const handleAnswer = (questionIndex, value) => {
         const newAnswers = [...answers];
         newAnswers[questionIndex] = value;
         setAnswers(newAnswers);
+
+        // Update the traits based on the questionIndex and the value (e.g. 0-6 for Likert scale)
+        updateTraits(questionIndex, value);
+    };
+
+    const updateTraits = (questionIndex, value) => {
+        let updatedTraits = { ...traits };
+
+        // Define how each question affects which trait
+        // For example, assume questions 0-9 influence Openness, 10-19 Conscientiousness, etc.
+        if (questionIndex >= 0 && questionIndex <= 9) {
+            updatedTraits.Openness += value - 3; // Neutral is 3
+        } else if (questionIndex >= 10 && questionIndex <= 19) {
+            updatedTraits.Conscientiousness += value - 3;
+        } else if (questionIndex >= 20 && questionIndex <= 29) {
+            updatedTraits.Extraversion += value - 3;
+        } else if (questionIndex >= 30 && questionIndex <= 39) {
+            updatedTraits.Agreeableness += value - 3;
+        } else if (questionIndex >= 40 && questionIndex <= 49) {
+            updatedTraits.Neuroticism += value - 3;
+        }
+
+        setTraits(updatedTraits);
     };
 
     const calculateResults = () => {
-        answers.forEach((answer, index) => {
-            if (answer !== null) {
-                const question = questionsData[index];
-                const trait = question.trait; // Assume each question has a `trait` key
-                const weight = question.weight; // Assume each question has a `weight` key
-                
-                // Adjust the trait values based on the user's answer
-                switch (trait) {
-                    case "Openness":
-                        traits.Openness += answer * weight;
-                        break;
-                    case "Conscientiousness":
-                        traits.Conscientiousness += answer * weight;
-                        break;
-                    case "Extraversion":
-                        traits.Extraversion += answer * weight;
-                        break;
-                    case "Agreeableness":
-                        traits.Agreeableness += answer * weight;
-                        break;
-                    case "Neuroticism":
-                        traits.Neuroticism += answer * weight;
-                        break;
-                    default:
-                        break;
-                }
-            }
-        });
-
-        // Determine the archetype based on the calculated traits
-        const archetype = determineArchetype(traits);
-        return archetype;
-    };
-
-    const determineArchetype = (traits) => {
         const { Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism } = traits;
 
-        if (Openness < 20 && Conscientiousness > 30 && Extraversion < 20 && Agreeableness > 30 && Neuroticism < 20) {
-            return { primary: "Shield", secondary: null };
-        } else if (Openness > 30 && Conscientiousness < 20 && Agreeableness > 30 && Neuroticism > 30) {
-            return { primary: "Labyrinth", secondary: null };
-        } else if (Openness >= 20 && Openness <= 30 && Conscientiousness > 30 && Extraversion > 30 && Agreeableness > 30 && Neuroticism < 20) {
-            return { primary: "Olive Branch", secondary: null };
-        } else if (Openness > 30 && Conscientiousness < 20 && Extraversion < 20 && Agreeableness <= 20 && Neuroticism > 20) {
-            return { primary: "Scroll", secondary: null };
-        } else if (Openness >= 20 && Openness <= 30 && Conscientiousness >= 20 && Conscientiousness <= 30 && Extraversion > 30 && Agreeableness > 30 && Neuroticism < 20) {
-            return { primary: "Lyre", secondary: null };
-        } else if (Openness < 20 && Conscientiousness >= 20 && Extraversion > 30 && Agreeableness < 20 && Neuroticism <= 20) {
-            return { primary: "Spear", secondary: null };
+        // Determine primary archetype based on trait scores
+        if (Openness > 10 && Conscientiousness < 0) {
+            return { primary: "Labyrinth", secondary: "Papyros" };
+        } else if (Conscientiousness > 10 && Openness < 0) {
+            return { primary: "Shield", secondary: "Helm" };
+        } else if (Extraversion > 10 && Conscientiousness > 10) {
+            return { primary: "Helm", secondary: "Lyre" };
+        } else if (Agreeableness > 10 && Conscientiousness > 10) {
+            return { primary: "Olive Branch", secondary: "Lyre" };
+        } else if (Openness > 10 && Extraversion < 0) {
+            return { primary: "Papyros", secondary: "Labyrinth" };
+        } else if (Extraversion > 10 && Neuroticism < 0) {
+            return { primary: "Lyre", secondary: "Helm" };
+        } else if (Neuroticism < 0 && Extraversion < 0) {
+            return { primary: "Hearth", secondary: "Olive Branch" };
+        } else if (Extraversion > 10 && Agreeableness < 0) {
+            return { primary: "Spear", secondary: "Helm" };
         } else {
-            return { primary: "Unknown", secondary: null };
+            setError("No clear result. Please try again.");
+            return { primary: null, secondary: null };
         }
     };
 
     return {
-        questionsData,
         answers,
-        currentPage,
         handleAnswer,
         calculateResults,
         error,
     };
-};
+}
