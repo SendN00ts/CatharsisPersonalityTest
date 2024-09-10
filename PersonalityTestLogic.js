@@ -123,43 +123,44 @@ export function usePersonalityTest() {
             },
         ];
 
-        // Calculate the percentage match for each archetype
-        const archetypeScores = archetypes.map(archetype => {
+        // Helper function to calculate how well a trait matches the archetype
+        function getTraitMatchScore(traitScore, traitThreshold) {
+            if (traitThreshold === "high") {
+                return traitScore >= 5 ? 1 : 0;
+            } else if (traitThreshold === "moderate") {
+                return traitScore >= 3 && traitScore <= 4 ? 1 : 0;
+            } else if (traitThreshold === "low") {
+                return traitScore <= 2 ? 1 : 0;
+            } else if (traitThreshold === "lowOrHigh") {
+                return traitScore <= 2 || traitScore >= 5 ? 1 : 0;
+            } else if (traitThreshold === "moderateToHigh") {
+                return traitScore >= 3 ? 1 : 0;
+            } else if (traitThreshold === "lowToModerate") {
+                return traitScore <= 3 ? 1 : 0;
+            }
+            return 0;
+        }
+
+        // Array to store the match score for each archetype
+        const archetypeScores = archetypes.map((archetype) => {
             const thresholds = archetype.thresholds;
 
-            const score = [
-                getTraitMatchScore(Openness, thresholds.Openness),
-                getTraitMatchScore(Conscientiousness, thresholds.Conscientiousness),
-                getTraitMatchScore(Extraversion, thresholds.Extraversion),
-                getTraitMatchScore(Agreeableness, thresholds.Agreeableness),
-                getTraitMatchScore(Neuroticism, thresholds.Neuroticism)
-            ].reduce((a, b) => a + b, 0);
+            const score =
+                getTraitMatchScore(Openness, thresholds.Openness) +
+                getTraitMatchScore(Conscientiousness, thresholds.Conscientiousness) +
+                getTraitMatchScore(Extraversion, thresholds.Extraversion) +
+                getTraitMatchScore(Agreeableness, thresholds.Agreeableness) +
+                getTraitMatchScore(Neuroticism, thresholds.Neuroticism);
 
-            return {
-                name: archetype.name,
-                percentage: (score / 5) * 100 // Calculate percentage match
-            };
+            return { name: archetype.name, score };
         });
 
-        return archetypeScores; // Return percentages for all archetypes
-    }
+        // Find the archetype with the highest score
+        const bestMatch = archetypeScores.reduce((best, current) => {
+            return current.score > best.score ? current : best;
+        }, { name: null, score: 0 });
 
-    // Helper function to get the match score for each trait
-    function getTraitMatchScore(traitScore, traitThreshold) {
-        if (traitThreshold === "high") {
-            return traitScore >= 5 ? 1 : 0;
-        } else if (traitThreshold === "moderate") {
-            return traitScore >= 3 && traitScore <= 4 ? 1 : 0;
-        } else if (traitThreshold === "low") {
-            return traitScore <= 2 ? 1 : 0;
-        } else if (traitThreshold === "lowOrHigh") {
-            return traitScore <= 2 || traitScore >= 5 ? 1 : 0;
-        } else if (traitThreshold === "moderateToHigh") {
-            return traitScore >= 3 ? 1 : 0;
-        } else if (traitThreshold === "lowToModerate") {
-            return traitScore <= 3 ? 1 : 0;
-        }
-        return 0;
+        return { primary: bestMatch.name, archetypeScores }; // Return the best match and scores for all archetypes
     }
 
     return {
