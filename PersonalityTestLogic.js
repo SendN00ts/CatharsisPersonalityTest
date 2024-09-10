@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export function usePersonalityTest() {
     const [answers, setAnswers] = useState(Array(50).fill(null)); // Example for 50 questions
@@ -9,6 +9,17 @@ export function usePersonalityTest() {
         Agreeableness: 0,
         Neuroticism: 0,
     });
+
+    useEffect(() => {
+        // Reset traits whenever a new test is started
+        setTraits({
+            Openness: 0,
+            Conscientiousness: 0,
+            Extraversion: 0,
+            Agreeableness: 0,
+            Neuroticism: 0,
+        });
+    }, [answers]);
 
     const handleAnswer = (questionIndex, value) => {
         const newAnswers = [...answers];
@@ -61,7 +72,66 @@ export function usePersonalityTest() {
                     Neuroticism: "low",
                 },
             },
-            // Add other archetypes here...
+            {
+                name: "Helm",
+                thresholds: {
+                    Openness: "high",
+                    Conscientiousness: "high",
+                    Extraversion: "high",
+                    Agreeableness: "moderate",
+                    Neuroticism: "low",
+                },
+            },
+            {
+                name: "Olive Branch",
+                thresholds: {
+                    Openness: "moderate",
+                    Conscientiousness: "high",
+                    Extraversion: "high",
+                    Agreeableness: "high",
+                    Neuroticism: "low",
+                },
+            },
+            {
+                name: "Papyros",
+                thresholds: {
+                    Openness: "high",
+                    Conscientiousness: "low",
+                    Extraversion: "low",
+                    Agreeableness: "lowToModerate",
+                    Neuroticism: "moderateToHigh",
+                },
+            },
+            {
+                name: "Lyra",
+                thresholds: {
+                    Openness: "moderate",
+                    Conscientiousness: "moderate",
+                    Extraversion: "high",
+                    Agreeableness: "high",
+                    Neuroticism: "low",
+                },
+            },
+            {
+                name: "Dory",
+                thresholds: {
+                    Openness: "low",
+                    Conscientiousness: "moderateToHigh",
+                    Extraversion: "high",
+                    Agreeableness: "low",
+                    Neuroticism: "lowToModerate",
+                },
+            },
+            {
+                name: "Estia",
+                thresholds: {
+                    Openness: "low",
+                    Conscientiousness: "low",
+                    Extraversion: "low",
+                    Agreeableness: "moderateToHigh",
+                    Neuroticism: "low",
+                },
+            },
         ];
 
         // Helper function to calculate how well a trait matches the archetype
@@ -96,18 +166,14 @@ export function usePersonalityTest() {
             return { name: archetype.name, score };
         });
 
-        // Calculate total score to convert into percentages
+        // Get percentages for archetypes based on their scores
         const totalScore = archetypeScores.reduce((total, archetype) => total + archetype.score, 0);
+        const percentages = archetypeScores.map(archetype => ({
+            name: archetype.name,
+            percentage: ((archetype.score / totalScore) * 100).toFixed(2), // Calculate percentage
+        }));
 
-        // Calculate percentages for each archetype
-        const archetypePercentages = archetypeScores.map((archetype) => {
-            return {
-                name: archetype.name,
-                percentage: ((archetype.score / totalScore) * 100).toFixed(2), // Calculate percentage
-            };
-        });
-
-        return archetypePercentages;
+        return percentages;
     }
 
     return {
