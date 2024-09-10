@@ -21,6 +21,7 @@ export function usePersonalityTest() {
     const updateTraits = (questionIndex, value) => {
         const updatedTraits = { ...traits };
 
+        // Trait calculation logic, adjust ranges as per the new design
         if (questionIndex >= 0 && questionIndex <= 9) {
             updatedTraits.Openness += value - 3;
         } else if (questionIndex >= 10 && questionIndex <= 19) {
@@ -36,79 +37,32 @@ export function usePersonalityTest() {
         setTraits(updatedTraits);
     };
 
-   function calculateResults() {
-    const { Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism } = traits;
+    function calculateResults() {
+        const { Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism } = traits;
 
-    const archetypes = [
-        {
-            name: "Labyrinth",
-            thresholds: {
-                Openness: "high",
-                Conscientiousness: "low",
-                Extraversion: "lowOrHigh",
-                Agreeableness: "high",
-                Neuroticism: "high",
+        const archetypes = [
+            {
+                name: "Labyrinth",
+                thresholds: {
+                    Openness: "high",
+                    Conscientiousness: "low",
+                    Extraversion: "lowOrHigh",
+                    Agreeableness: "high",
+                    Neuroticism: "high",
+                },
             },
-        },
-        {
-            name: "Shield",
-            thresholds: {
-                Openness: "low",
-                Conscientiousness: "high",
-                Extraversion: "low",
-                Agreeableness: "moderateToHigh",
-                Neuroticism: "low",
+            {
+                name: "Shield",
+                thresholds: {
+                    Openness: "low",
+                    Conscientiousness: "high",
+                    Extraversion: "low",
+                    Agreeableness: "moderateToHigh",
+                    Neuroticism: "low",
+                },
             },
-        },
-        // Other archetypes...
-    ];
-
-    // Helper function to calculate how well a trait matches the archetype
-    function getTraitMatchScore(traitScore, traitThreshold) {
-        if (traitThreshold === "high") {
-            return traitScore >= 5 ? 1 : 0;
-        } else if (traitThreshold === "moderate") {
-            return traitScore >= 3 && traitScore <= 4 ? 1 : 0;
-        } else if (traitThreshold === "low") {
-            return traitScore <= 2 ? 1 : 0;
-        } else if (traitThreshold === "lowOrHigh") {
-            return traitScore <= 2 || traitScore >= 5 ? 1 : 0;
-        } else if (traitThreshold === "moderateToHigh") {
-            return traitScore >= 3 ? 1 : 0;
-        } else if (traitThreshold === "lowToModerate") {
-            return traitScore <= 3 ? 1 : 0;
-        }
-        return 0;
-    }
-
-    // Array to store the match score for each archetype
-    const archetypeScores = archetypes.map((archetype) => {
-        const thresholds = archetype.thresholds;
-
-        const score =
-            getTraitMatchScore(Openness, thresholds.Openness) +
-            getTraitMatchScore(Conscientiousness, thresholds.Conscientiousness) +
-            getTraitMatchScore(Extraversion, thresholds.Extraversion) +
-            getTraitMatchScore(Agreeableness, thresholds.Agreeableness) +
-            getTraitMatchScore(Neuroticism, thresholds.Neuroticism);
-
-        return { name: archetype.name, score };
-    });
-
-    // Calculate total score to convert into percentages
-    const totalScore = archetypeScores.reduce((total, archetype) => total + archetype.score, 0);
-
-    // Calculate percentages for each archetype
-    const archetypePercentages = archetypeScores.map((archetype) => {
-        return {
-            name: archetype.name,
-            percentage: ((archetype.score / totalScore) * 100).toFixed(2), // Calculate percentage
-        };
-    });
-
-    return archetypePercentages;
-}
-
+            // Add other archetypes here...
+        ];
 
         // Helper function to calculate how well a trait matches the archetype
         function getTraitMatchScore(traitScore, traitThreshold) {
@@ -142,16 +96,18 @@ export function usePersonalityTest() {
             return { name: archetype.name, score };
         });
 
-        // Sum of all archetype scores to calculate percentages
-        const totalScore = archetypeScores.reduce((sum, archetype) => sum + archetype.score, 0);
+        // Calculate total score to convert into percentages
+        const totalScore = archetypeScores.reduce((total, archetype) => total + archetype.score, 0);
 
         // Calculate percentages for each archetype
-        const archetypePercentages = archetypeScores.map(archetype => ({
-            name: archetype.name,
-            percentage: totalScore ? (archetype.score / totalScore) * 100 : 0,
-        }));
+        const archetypePercentages = archetypeScores.map((archetype) => {
+            return {
+                name: archetype.name,
+                percentage: ((archetype.score / totalScore) * 100).toFixed(2), // Calculate percentage
+            };
+        });
 
-        return archetypePercentages; // Return array of archetype percentages
+        return archetypePercentages;
     }
 
     return {
