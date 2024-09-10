@@ -37,93 +37,131 @@ export function usePersonalityTest() {
         setTraits(updatedTraits);
     };
 
-    function calculateResults() {
-        const { Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism } = traits;
+    function calculateResults(traits) {
+    const { openness, conscientiousness, extraversion, agreeableness, neuroticism } = traits;
 
-        // Define the trait thresholds for each archetype
-        const archetypes = [
-            {
-                name: "Labyrinth",
-                thresholds: {
-                    Openness: "high",
-                    Conscientiousness: "low",
-                    Extraversion: "lowOrHigh",
-                    Agreeableness: "high",
-                    Neuroticism: "high",
-                },
+    const archetypes = [
+        {
+            name: "Labyrinth",
+            thresholds: {
+                openness: "high",
+                conscientiousness: "low",
+                extraversion: "lowOrHigh",
+                agreeableness: "high",
+                neuroticism: "high",
             },
-            {
-                name: "Shield",
-                thresholds: {
-                    Openness: "low",
-                    Conscientiousness: "high",
-                    Extraversion: "low",
-                    Agreeableness: "moderateToHigh",
-                    Neuroticism: "low",
-                },
+        },
+        {
+            name: "Shield",
+            thresholds: {
+                openness: "low",
+                conscientiousness: "high",
+                extraversion: "low",
+                agreeableness: "moderateToHigh",
+                neuroticism: "low",
             },
-            {
-                name: "Helm",
-                thresholds: {
-                    Openness: "high",
-                    Conscientiousness: "high",
-                    Extraversion: "high",
-                    Agreeableness: "moderate",
-                    Neuroticism: "low",
-                },
+        },
+        {
+            name: "Helm",
+            thresholds: {
+                openness: "high",
+                conscientiousness: "high",
+                extraversion: "high",
+                agreeableness: "moderate",
+                neuroticism: "low",
             },
-            {
-                name: "OliveBranch",
-                thresholds: {
-                    Openness: "moderate",
-                    Conscientiousness: "high",
-                    Extraversion: "high",
-                    Agreeableness: "high",
-                    Neuroticism: "low",
-                },
+        },
+        {
+            name: "Olive Branch",
+            thresholds: {
+                openness: "moderate",
+                conscientiousness: "high",
+                extraversion: "high",
+                agreeableness: "high",
+                neuroticism: "low",
             },
-            {
-                name: "Papyros",
-                thresholds: {
-                    Openness: "high",
-                    Conscientiousness: "low",
-                    Extraversion: "low",
-                    Agreeableness: "lowToModerate",
-                    Neuroticism: "moderateToHigh",
-                },
+        },
+        {
+            name: "Papyros",
+            thresholds: {
+                openness: "high",
+                conscientiousness: "low",
+                extraversion: "low",
+                agreeableness: "lowToModerate",
+                neuroticism: "moderateToHigh",
             },
-            {
-                name: "Lyra",
-                thresholds: {
-                    Openness: "moderate",
-                    Conscientiousness: "moderate",
-                    Extraversion: "high",
-                    Agreeableness: "high",
-                    Neuroticism: "low",
-                },
+        },
+        {
+            name: "Lyra",
+            thresholds: {
+                openness: "moderate",
+                conscientiousness: "moderate",
+                extraversion: "high",
+                agreeableness: "high",
+                neuroticism: "low",
             },
-            {
-                name: "Dory",
-                thresholds: {
-                    Openness: "low",
-                    Conscientiousness: "moderateToHigh",
-                    Extraversion: "high",
-                    Agreeableness: "low",
-                    Neuroticism: "lowToModerate",
-                },
+        },
+        {
+            name: "Dory",
+            thresholds: {
+                openness: "low",
+                conscientiousness: "moderateToHigh",
+                extraversion: "high",
+                agreeableness: "low",
+                neuroticism: "lowToModerate",
             },
-            {
-                name: "Estia",
-                thresholds: {
-                    Openness: "low",
-                    Conscientiousness: "low",
-                    Extraversion: "low",
-                    Agreeableness: "moderateToHigh",
-                    Neuroticism: "low",
-                },
+        },
+        {
+            name: "Estia",
+            thresholds: {
+                openness: "low",
+                conscientiousness: "low",
+                extraversion: "low",
+                agreeableness: "moderateToHigh",
+                neuroticism: "low",
             },
-        ];
+        },
+    ];
 
+    // Helper function to calculate how well a trait matches the archetype
+    function getTraitMatchScore(traitScore, traitThreshold) {
+        if (traitThreshold === "high") {
+            return traitScore >= 5 ? 1 : 0;
+        } else if (traitThreshold === "moderate") {
+            return traitScore >= 3 && traitScore <= 4 ? 1 : 0;
+        } else if (traitThreshold === "low") {
+            return traitScore <= 2 ? 1 : 0;
+        } else if (traitThreshold === "lowOrHigh") {
+            return traitScore <= 2 || traitScore >= 5 ? 1 : 0;
+        } else if (traitThreshold === "moderateToHigh") {
+            return traitScore >= 3 ? 1 : 0;
+        } else if (traitThreshold === "lowToModerate") {
+            return traitScore <= 3 ? 1 : 0;
+        }
+        return 0;
+    }
+
+    // Array to store the match score for each archetype
+    const archetypeScores = archetypes.map(archetype => {
+        const thresholds = archetype.thresholds;
+
+        const score =
+            getTraitMatchScore(openness, thresholds.openness) +
+            getTraitMatchScore(conscientiousness, thresholds.conscientiousness) +
+            getTraitMatchScore(extraversion, thresholds.extraversion) +
+            getTraitMatchScore(agreeableness, thresholds.agreeableness) +
+            getTraitMatchScore(neuroticism, thresholds.neuroticism);
+
+        return { name: archetype.name, score };
+    });
+
+    // Find the archetype with the highest score
+    const bestMatch = archetypeScores.reduce((best, current) => {
+        return current.score > best.score ? current : best;
+    }, { name: null, score: 0 });
+
+    return { primary: bestMatch.name }; // Return the best match
+}
         // Helper function to determine if the trait is in the correct range for the archetype
         function isTraitMatch(traitScore, traitThreshold) {
             if (traitThreshold === "high") {
