@@ -61,46 +61,7 @@ export function usePersonalityTest() {
                     Neuroticism: "low",
                 },
             },
-            {
-                name: "Helm",
-                thresholds: {
-                    Openness: "high",
-                    Conscientiousness: "high",
-                    Extraversion: "high",
-                    Agreeableness: "moderate",
-                    Neuroticism: "low",
-                },
-            },
-            {
-                name: "Olive Branch",
-                thresholds: {
-                    Openness: "moderate",
-                    Conscientiousness: "high",
-                    Extraversion: "high",
-                    Agreeableness: "high",
-                    Neuroticism: "low",
-                },
-            },
-            {
-                name: "Papyros",
-                thresholds: {
-                    Openness: "high",
-                    Conscientiousness: "low",
-                    Extraversion: "low",
-                    Agreeableness: "lowToModerate",
-                    Neuroticism: "moderateToHigh",
-                },
-            },
-            {
-                name: "Lyra",
-                thresholds: {
-                    Openness: "moderate",
-                    Conscientiousness: "moderate",
-                    Extraversion: "high",
-                    Agreeableness: "high",
-                    Neuroticism: "low",
-                },
-            },
+            // Add the rest of your archetypes here
             {
                 name: "Dory",
                 thresholds: {
@@ -109,16 +70,6 @@ export function usePersonalityTest() {
                     Extraversion: "high",
                     Agreeableness: "low",
                     Neuroticism: "lowToModerate",
-                },
-            },
-            {
-                name: "Estia",
-                thresholds: {
-                    Openness: "low",
-                    Conscientiousness: "low",
-                    Extraversion: "low",
-                    Agreeableness: "moderateToHigh",
-                    Neuroticism: "low",
                 },
             },
         ];
@@ -155,14 +106,14 @@ export function usePersonalityTest() {
             return { name: archetype.name, score };
         });
 
-        // Calculate percentages
+        // Calculate percentages for each archetype
         const totalScore = archetypeScores.reduce((sum, archetype) => sum + archetype.score, 0);
-        const archetypePercentages = archetypeScores.map(archetype => ({
+        const percentages = archetypeScores.map(archetype => ({
             name: archetype.name,
-            percentage: ((archetype.score / totalScore) * 100).toFixed(2) + '%'
+            percentage: (archetype.score / totalScore) * 100,
         }));
 
-        return archetypePercentages; // Return all archetypes with percentages
+        return percentages; // Return the percentages of archetypes
     }
 
     return {
