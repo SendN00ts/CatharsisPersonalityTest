@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export function usePersonalityTest() {
     const [answers, setAnswers] = useState(Array(50).fill(null)); // Example for 50 questions
@@ -9,17 +9,6 @@ export function usePersonalityTest() {
         Agreeableness: 0,
         Neuroticism: 0,
     });
-
-    useEffect(() => {
-        // Reset traits whenever a new test is started
-        setTraits({
-            Openness: 0,
-            Conscientiousness: 0,
-            Extraversion: 0,
-            Agreeableness: 0,
-            Neuroticism: 0,
-        });
-    }, [answers]);
 
     const handleAnswer = (questionIndex, value) => {
         const newAnswers = [...answers];
@@ -134,46 +123,43 @@ export function usePersonalityTest() {
             },
         ];
 
-        // Helper function to calculate how well a trait matches the archetype
-        function getTraitMatchScore(traitScore, traitThreshold) {
-            if (traitThreshold === "high") {
-                return traitScore >= 5 ? 1 : 0;
-            } else if (traitThreshold === "moderate") {
-                return traitScore >= 3 && traitScore <= 4 ? 1 : 0;
-            } else if (traitThreshold === "low") {
-                return traitScore <= 2 ? 1 : 0;
-            } else if (traitThreshold === "lowOrHigh") {
-                return traitScore <= 2 || traitScore >= 5 ? 1 : 0;
-            } else if (traitThreshold === "moderateToHigh") {
-                return traitScore >= 3 ? 1 : 0;
-            } else if (traitThreshold === "lowToModerate") {
-                return traitScore <= 3 ? 1 : 0;
-            }
-            return 0;
-        }
-
-        // Array to store the match score for each archetype
-        const archetypeScores = archetypes.map((archetype) => {
+        // Calculate the percentage match for each archetype
+        const archetypeScores = archetypes.map(archetype => {
             const thresholds = archetype.thresholds;
 
-            const score =
-                getTraitMatchScore(Openness, thresholds.Openness) +
-                getTraitMatchScore(Conscientiousness, thresholds.Conscientiousness) +
-                getTraitMatchScore(Extraversion, thresholds.Extraversion) +
-                getTraitMatchScore(Agreeableness, thresholds.Agreeableness) +
-                getTraitMatchScore(Neuroticism, thresholds.Neuroticism);
+            const score = [
+                getTraitMatchScore(Openness, thresholds.Openness),
+                getTraitMatchScore(Conscientiousness, thresholds.Conscientiousness),
+                getTraitMatchScore(Extraversion, thresholds.Extraversion),
+                getTraitMatchScore(Agreeableness, thresholds.Agreeableness),
+                getTraitMatchScore(Neuroticism, thresholds.Neuroticism)
+            ].reduce((a, b) => a + b, 0);
 
-            return { name: archetype.name, score };
+            return {
+                name: archetype.name,
+                percentage: (score / 5) * 100 // Calculate percentage match
+            };
         });
 
-        // Get percentages for archetypes based on their scores
-        const totalScore = archetypeScores.reduce((total, archetype) => total + archetype.score, 0);
-        const percentages = archetypeScores.map(archetype => ({
-            name: archetype.name,
-            percentage: ((archetype.score / totalScore) * 100).toFixed(2), // Calculate percentage
-        }));
+        return archetypeScores; // Return percentages for all archetypes
+    }
 
-        return percentages;
+    // Helper function to get the match score for each trait
+    function getTraitMatchScore(traitScore, traitThreshold) {
+        if (traitThreshold === "high") {
+            return traitScore >= 5 ? 1 : 0;
+        } else if (traitThreshold === "moderate") {
+            return traitScore >= 3 && traitScore <= 4 ? 1 : 0;
+        } else if (traitThreshold === "low") {
+            return traitScore <= 2 ? 1 : 0;
+        } else if (traitThreshold === "lowOrHigh") {
+            return traitScore <= 2 || traitScore >= 5 ? 1 : 0;
+        } else if (traitThreshold === "moderateToHigh") {
+            return traitScore >= 3 ? 1 : 0;
+        } else if (traitThreshold === "lowToModerate") {
+            return traitScore <= 3 ? 1 : 0;
+        }
+        return 0;
     }
 
     return {
