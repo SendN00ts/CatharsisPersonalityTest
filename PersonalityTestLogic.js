@@ -155,12 +155,14 @@ export function usePersonalityTest() {
             return { name: archetype.name, score };
         });
 
-        // Find the archetype with the highest score
-        const bestMatch = archetypeScores.reduce((best, current) => {
-            return current.score > best.score ? current : best;
-        }, { name: null, score: 0 });
+        // Calculate percentages
+        const totalScore = archetypeScores.reduce((sum, archetype) => sum + archetype.score, 0);
+        const archetypePercentages = archetypeScores.map(archetype => ({
+            name: archetype.name,
+            percentage: ((archetype.score / totalScore) * 100).toFixed(2) + '%'
+        }));
 
-        return { primary: bestMatch.name }; // Return the best match
+        return archetypePercentages; // Return all archetypes with percentages
     }
 
     return {
