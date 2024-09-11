@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 export function usePersonalityTest() {
-    const [answers, setAnswers] = useState(Array(50).fill(null)); // Example for 50 questions
+    const [answers, setAnswers] = useState(Array(50).fill(null)); // For 50 questions
     const [traits, setTraits] = useState({
         Openness: 0,
         Conscientiousness: 0,
@@ -11,10 +11,9 @@ export function usePersonalityTest() {
     });
 
     const handleAnswer = (questionIndex, value) => {
-        // Log the value being passed for debugging
+        // Ensure the value is within the acceptable range (1 to 7)
         console.log(`Question Index: ${questionIndex + 1} - "Value:"`, value);
-
-        // Ensure the value is within the acceptable range (e.g., 1 to 7)
+        
         if (value < 1 || value > 7) {
             console.error(`Invalid value received for question ${questionIndex + 1}:`, value);
             return;
@@ -25,41 +24,43 @@ export function usePersonalityTest() {
         setAnswers(newAnswers);
 
         updateTraits(questionIndex, value);
-        console.log(`Updated answers after question ${questionIndex + 1}:`, newAnswers);
     };
 
     const updateTraits = (questionIndex, value) => {
-        console.log(`Before updating traits for question ${questionIndex + 1}:`, traits);
-
         const updatedTraits = { ...traits };
 
-        // Since the scale is 1-7, we will normalize the values around 4.
+        // Accumulate raw values (1 to 7)
         if (value !== null && value >= 1 && value <= 7) {
-            const normalizedValue = value - 4; // Centralize the scale around 0 (e.g., 1 becomes -3, 7 becomes +3)
-            
             if (questionIndex >= 0 && questionIndex <= 9) {
-                updatedTraits.Openness += normalizedValue;
+                updatedTraits.Openness += value;
             } else if (questionIndex >= 10 && questionIndex <= 19) {
-                updatedTraits.Conscientiousness += normalizedValue;
+                updatedTraits.Conscientiousness += value;
             } else if (questionIndex >= 20 && questionIndex <= 29) {
-                updatedTraits.Extraversion += normalizedValue;
+                updatedTraits.Extraversion += value;
             } else if (questionIndex >= 30 && questionIndex <= 39) {
-                updatedTraits.Agreeableness += normalizedValue;
+                updatedTraits.Agreeableness += value;
             } else if (questionIndex >= 40 && questionIndex <= 49) {
-                updatedTraits.Neuroticism += normalizedValue;
+                updatedTraits.Neuroticism += value;
             }
         } else {
             console.error(`Invalid value passed to updateTraits for question ${questionIndex + 1}:`, value);
         }
 
         setTraits(updatedTraits);
-        console.log(`After updating traits for question ${questionIndex + 1}:`, updatedTraits);
+        console.log(`Updated Traits for question ${questionIndex + 1}:`, updatedTraits);
     };
 
     function calculateResults() {
-        const { Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism } = traits;
+        const totalQuestionsPerTrait = 10;
 
-        console.log("Final Trait values after all answers:", { Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism });
+        // Calculate average scores
+        const Openness = traits.Openness / totalQuestionsPerTrait;
+        const Conscientiousness = traits.Conscientiousness / totalQuestionsPerTrait;
+        const Extraversion = traits.Extraversion / totalQuestionsPerTrait;
+        const Agreeableness = traits.Agreeableness / totalQuestionsPerTrait;
+        const Neuroticism = traits.Neuroticism / totalQuestionsPerTrait;
+
+        console.log("Final Trait averages after all answers:", { Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism });
 
         const archetypes = [
             {
@@ -148,15 +149,15 @@ export function usePersonalityTest() {
             if (traitThreshold === "high") {
                 return traitScore >= 5 ? 1 : 0;
             } else if (traitThreshold === "moderate") {
-                return traitScore >= 3 && traitScore <= 4 ? 1 : 0;
+                return traitScore >= 3 && traitScore < 5 ? 1 : 0;
             } else if (traitThreshold === "low") {
-                return traitScore <= 2 ? 1 : 0;
+                return traitScore < 3 ? 1 : 0;
             } else if (traitThreshold === "lowOrHigh") {
-                return traitScore <= 2 || traitScore >= 5 ? 1 : 0;
+                return traitScore < 3 || traitScore >= 5 ? 1 : 0;
             } else if (traitThreshold === "moderateToHigh") {
                 return traitScore >= 3 ? 1 : 0;
             } else if (traitThreshold === "lowToModerate") {
-                return traitScore <= 3 ? 1 : 0;
+                return traitScore < 5 ? 1 : 0;
             }
             return 0;
         }
