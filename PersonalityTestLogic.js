@@ -20,9 +20,12 @@ export function usePersonalityTest() {
     };
 
     const updateTraits = (questionIndex, value) => {
-        const updatedTraits = { ...traits };
+    console.log("Question Index:", questionIndex, "Value:", value); // Log for debugging
+    const updatedTraits = { ...traits };
 
-        // Trait calculation logic for ranges
+    // Check if value is valid
+    if (value !== null && value >= 1 && value <= 5) {
+        // Trait calculation logic, assuming value is from a Likert scale (1-5)
         if (questionIndex >= 0 && questionIndex <= 9) {
             updatedTraits.Openness += value - 3;
         } else if (questionIndex >= 10 && questionIndex <= 19) {
@@ -34,9 +37,14 @@ export function usePersonalityTest() {
         } else if (questionIndex >= 40 && questionIndex <= 49) {
             updatedTraits.Neuroticism += value - 3;
         }
+    } else {
+        console.error("Invalid value passed to updateTraits:", value);
+    }
 
-        setTraits(updatedTraits); // Update traits state
-    };
+    console.log("Updated Traits:", updatedTraits); // Log updated traits for debugging
+    setTraits(updatedTraits);
+};
+
 
     // Function to calculate percentages for each archetype
     function calculateResults() {
