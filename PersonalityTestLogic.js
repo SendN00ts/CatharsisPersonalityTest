@@ -10,22 +10,22 @@ export function usePersonalityTest() {
         Neuroticism: 0,
     });
 
-    const handleAnswer = (questionIndex, value) => {
+    const handleAnswer = (questionIndex, newValue) => {
         // Log the value being passed for debugging
-        console.log(`Question Index: ${questionIndex + 1} - "Value:"`, value);
+        console.log(`Question Index: ${questionIndex + 1} - "New Value:"`, newValue);
 
         // Ensure the value is within the acceptable range (e.g., 1 to 7)
-        if (value < 1 || value > 7) {
-            console.error(`Invalid value received for question ${questionIndex + 1}:`, value);
+        if (newValue < 1 || newValue > 7) {
+            console.error(`Invalid value received for question ${questionIndex + 1}:`, newValue);
             return;
         }
 
         const previousAnswer = answers[questionIndex]; // Get the previous answer to the question
         const newAnswers = [...answers];
-        newAnswers[questionIndex] = value;
+        newAnswers[questionIndex] = newValue;
         setAnswers(newAnswers);
 
-        updateTraits(questionIndex, value, previousAnswer); // Pass previous answer for adjustment
+        updateTraits(questionIndex, newValue, previousAnswer); // Pass previous answer for adjustment
         console.log(`Updated answers after question ${questionIndex + 1}:`, newAnswers);
     };
 
@@ -34,21 +34,23 @@ export function usePersonalityTest() {
 
         const updatedTraits = { ...traits };
 
-        // Since the scale is 1-7, we will normalize the values around 4.
-        const normalizedNewValue = newValue - 4; // Centralize the scale around 0 (e.g., 1 becomes -3, 7 becomes +3)
-        const normalizedPreviousValue = previousValue !== null ? previousValue - 4 : 0; // Normalize the previous value
+        // Normalize values around 0 (i.e., 1 becomes -3, 7 becomes +3)
+        const normalizeValue = (value) => value - 4;
+
+        const normalizedNewValue = normalizeValue(newValue);
+        const normalizedPreviousValue = previousValue !== null ? normalizeValue(previousValue) : 0; // Normalize the previous value if it exists
 
         // Adjust traits by removing the effect of the previous answer and adding the new answer
         if (questionIndex >= 0 && questionIndex <= 9) {
-            updatedTraits.Openness = updatedTraits.Openness - normalizedPreviousValue + normalizedNewValue;
+            updatedTraits.Openness += normalizedNewValue - normalizedPreviousValue;
         } else if (questionIndex >= 10 && questionIndex <= 19) {
-            updatedTraits.Conscientiousness = updatedTraits.Conscientiousness - normalizedPreviousValue + normalizedNewValue;
+            updatedTraits.Conscientiousness += normalizedNewValue - normalizedPreviousValue;
         } else if (questionIndex >= 20 && questionIndex <= 29) {
-            updatedTraits.Extraversion = updatedTraits.Extraversion - normalizedPreviousValue + normalizedNewValue;
+            updatedTraits.Extraversion += normalizedNewValue - normalizedPreviousValue;
         } else if (questionIndex >= 30 && questionIndex <= 39) {
-            updatedTraits.Agreeableness = updatedTraits.Agreeableness - normalizedPreviousValue + normalizedNewValue;
+            updatedTraits.Agreeableness += normalizedNewValue - normalizedPreviousValue;
         } else if (questionIndex >= 40 && questionIndex <= 49) {
-            updatedTraits.Neuroticism = updatedTraits.Neuroticism - normalizedPreviousValue + normalizedNewValue;
+            updatedTraits.Neuroticism += normalizedNewValue - normalizedPreviousValue;
         }
 
         setTraits(updatedTraits);
