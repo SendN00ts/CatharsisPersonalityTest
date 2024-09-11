@@ -10,48 +10,46 @@ export function usePersonalityTest() {
         Neuroticism: 0,
     });
 
-    // Handle answer input and update traits
     const handleAnswer = (questionIndex, value) => {
+        console.log(`Answer received for question ${questionIndex + 1}: ${value}`);
+        
         const newAnswers = [...answers];
         newAnswers[questionIndex] = value;
         setAnswers(newAnswers);
 
-        updateTraits(questionIndex, value); // Update trait scores
+        updateTraits(questionIndex, value);
+        console.log(`Updated answers after question ${questionIndex + 1}:`, newAnswers);
     };
 
     const updateTraits = (questionIndex, value) => {
-    console.log("Question Index:", questionIndex, "Value:", value); // Log for debugging
-    const updatedTraits = { ...traits };
+        console.log(`Before updating traits for question ${questionIndex + 1}:`, traits);
 
-    // Check if value is valid
-    if (value !== null && value >= 1 && value <= 5) {
-        // Trait calculation logic, assuming value is from a Likert scale (1-5)
-        if (questionIndex >= 0 && questionIndex <= 9) {
-            updatedTraits.Openness += value - 3;
-        } else if (questionIndex >= 10 && questionIndex <= 19) {
-            updatedTraits.Conscientiousness += value - 3;
-        } else if (questionIndex >= 20 && questionIndex <= 29) {
-            updatedTraits.Extraversion += value - 3;
-        } else if (questionIndex >= 30 && questionIndex <= 39) {
-            updatedTraits.Agreeableness += value - 3;
-        } else if (questionIndex >= 40 && questionIndex <= 49) {
-            updatedTraits.Neuroticism += value - 3;
+        const updatedTraits = { ...traits };
+
+        if (value !== null && value >= 1 && value <= 5) {
+            if (questionIndex >= 0 && questionIndex <= 9) {
+                updatedTraits.Openness += value - 3;
+            } else if (questionIndex >= 10 && questionIndex <= 19) {
+                updatedTraits.Conscientiousness += value - 3;
+            } else if (questionIndex >= 20 && questionIndex <= 29) {
+                updatedTraits.Extraversion += value - 3;
+            } else if (questionIndex >= 30 && questionIndex <= 39) {
+                updatedTraits.Agreeableness += value - 3;
+            } else if (questionIndex >= 40 && questionIndex <= 49) {
+                updatedTraits.Neuroticism += value - 3;
+            }
+        } else {
+            console.error(`Invalid value passed to updateTraits for question ${questionIndex + 1}:`, value);
         }
-    } else {
-        console.error("Invalid value passed to updateTraits:", value);
-    }
 
-    console.log("Updated Traits:", updatedTraits); // Log updated traits for debugging
-    setTraits(updatedTraits);
-};
+        setTraits(updatedTraits);
+        console.log(`After updating traits for question ${questionIndex + 1}:`, updatedTraits);
+    };
 
-
-    // Function to calculate percentages for each archetype
     function calculateResults() {
         const { Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism } = traits;
 
-        // Log trait values for debugging
-        console.log("Trait values:", { Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism });
+        console.log("Final Trait values after all answers:", { Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism });
 
         const archetypes = [
             {
@@ -74,10 +72,9 @@ export function usePersonalityTest() {
                     Neuroticism: "low",
                 },
             },
-            // Continue adding other archetypes...
+            // ... other archetypes
         ];
 
-        // Helper to calculate match score based on threshold logic
         function getTraitMatchScore(traitScore, traitThreshold) {
             if (traitThreshold === "high") {
                 return traitScore >= 5 ? 1 : 0;
@@ -95,7 +92,6 @@ export function usePersonalityTest() {
             return 0;
         }
 
-        // Calculate match scores for each archetype
         const archetypeScores = archetypes.map((archetype) => {
             const thresholds = archetype.thresholds;
 
@@ -109,33 +105,17 @@ export function usePersonalityTest() {
             return { name: archetype.name, score };
         });
 
-        console.log("Archetype Scores:", archetypeScores); // Log scores for debugging
-
-        // Get the total score sum for percentage calculation
-        const totalScore = archetypeScores.reduce((total, archetype) => total + archetype.score, 0);
-
-        // Calculate the percentage for each archetype
-        const archetypePercentages = archetypeScores.map((archetype) => ({
-            name: archetype.name,
-            percentage: ((archetype.score / totalScore) * 100).toFixed(2) + '%'
-        }));
-
-        console.log("Archetype Percentages:", archetypePercentages);
+        console.log("Archetype Scores calculated:", archetypeScores);
 
         const bestMatch = archetypeScores.reduce((best, current) => {
             return current.score > best.score ? current : best;
         }, { name: null, score: 0 });
 
-        console.log("Best Match:", bestMatch); // Log the best match
-
-        // Error if no archetype found
-        if (!bestMatch.name) {
-            console.error("No archetype found for the calculated results.");
-        }
+        console.log("Best match archetype:", bestMatch);
 
         return {
             primary: bestMatch.name,
-            percentages: archetypePercentages, // Return all archetype percentages
+            scores: archetypeScores,
         };
     }
 
