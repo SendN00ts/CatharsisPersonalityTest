@@ -11,7 +11,6 @@ export function usePersonalityTest() {
     });
 
     const handleAnswer = (questionIndex, newValue) => {
-        // Log the value being passed for debugging
         console.log(`Question Index: ${questionIndex + 1} - "New Value:"`, newValue);
 
         // Ensure the value is within the acceptable range (e.g., 1 to 7)
@@ -42,14 +41,19 @@ export function usePersonalityTest() {
 
         // Adjust traits by removing the effect of the previous answer and adding the new answer
         if (questionIndex >= 0 && questionIndex <= 9) {
+            // Openness
             updatedTraits.Openness += normalizedNewValue - normalizedPreviousValue;
         } else if (questionIndex >= 10 && questionIndex <= 19) {
+            // Conscientiousness
             updatedTraits.Conscientiousness += normalizedNewValue - normalizedPreviousValue;
         } else if (questionIndex >= 20 && questionIndex <= 29) {
+            // Extraversion
             updatedTraits.Extraversion += normalizedNewValue - normalizedPreviousValue;
         } else if (questionIndex >= 30 && questionIndex <= 39) {
+            // Agreeableness
             updatedTraits.Agreeableness += normalizedNewValue - normalizedPreviousValue;
         } else if (questionIndex >= 40 && questionIndex <= 49) {
+            // Neuroticism
             updatedTraits.Neuroticism += normalizedNewValue - normalizedPreviousValue;
         }
 
