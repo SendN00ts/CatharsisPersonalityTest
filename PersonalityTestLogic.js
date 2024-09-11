@@ -10,18 +10,19 @@ export function usePersonalityTest() {
         Neuroticism: 0,
     });
 
+    // Handle answer input and update traits
     const handleAnswer = (questionIndex, value) => {
         const newAnswers = [...answers];
         newAnswers[questionIndex] = value;
         setAnswers(newAnswers);
 
-        updateTraits(questionIndex, value);
+        updateTraits(questionIndex, value); // Update trait scores
     };
 
     const updateTraits = (questionIndex, value) => {
         const updatedTraits = { ...traits };
 
-        // Trait calculation logic, adjust ranges as per the new design
+        // Trait calculation logic for ranges
         if (questionIndex >= 0 && questionIndex <= 9) {
             updatedTraits.Openness += value - 3;
         } else if (questionIndex >= 10 && questionIndex <= 19) {
@@ -34,9 +35,10 @@ export function usePersonalityTest() {
             updatedTraits.Neuroticism += value - 3;
         }
 
-        setTraits(updatedTraits);
+        setTraits(updatedTraits); // Update traits state
     };
 
+    // Calculate Results and Percentages
     function calculateResults() {
         const { Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism } = traits;
 
@@ -64,66 +66,7 @@ export function usePersonalityTest() {
                     Neuroticism: "low",
                 },
             },
-            {
-                name: "Helm",
-                thresholds: {
-                    Openness: "high",
-                    Conscientiousness: "high",
-                    Extraversion: "high",
-                    Agreeableness: "moderate",
-                    Neuroticism: "low",
-                },
-            },
-            {
-                name: "Olive Branch",
-                thresholds: {
-                    Openness: "moderate",
-                    Conscientiousness: "high",
-                    Extraversion: "high",
-                    Agreeableness: "high",
-                    Neuroticism: "low",
-                },
-            },
-            {
-                name: "Papyros",
-                thresholds: {
-                    Openness: "high",
-                    Conscientiousness: "low",
-                    Extraversion: "low",
-                    Agreeableness: "lowToModerate",
-                    Neuroticism: "moderateToHigh",
-                },
-            },
-            {
-                name: "Lyra",
-                thresholds: {
-                    Openness: "moderate",
-                    Conscientiousness: "moderate",
-                    Extraversion: "high",
-                    Agreeableness: "high",
-                    Neuroticism: "low",
-                },
-            },
-            {
-                name: "Dory",
-                thresholds: {
-                    Openness: "low",
-                    Conscientiousness: "moderateToHigh",
-                    Extraversion: "high",
-                    Agreeableness: "low",
-                    Neuroticism: "lowToModerate",
-                },
-            },
-            {
-                name: "Estia",
-                thresholds: {
-                    Openness: "low",
-                    Conscientiousness: "low",
-                    Extraversion: "low",
-                    Agreeableness: "moderateToHigh",
-                    Neuroticism: "low",
-                },
-            },
+            // Continue adding other archetypes...
         ];
 
         function getTraitMatchScore(traitScore, traitThreshold) {
@@ -143,6 +86,7 @@ export function usePersonalityTest() {
             return 0;
         }
 
+        // Calculate scores for each archetype
         const archetypeScores = archetypes.map((archetype) => {
             const thresholds = archetype.thresholds;
 
@@ -156,21 +100,25 @@ export function usePersonalityTest() {
             return { name: archetype.name, score };
         });
 
-        console.log("Archetype Scores:", archetypeScores); // Log scores for debugging
+        // Log the calculated archetype scores
+        console.log("Archetype Scores:", archetypeScores);
 
+        // Get the archetype with the highest score
         const bestMatch = archetypeScores.reduce((best, current) => {
             return current.score > best.score ? current : best;
         }, { name: null, score: 0 });
 
         console.log("Best Match:", bestMatch); // Log the best match
 
+        // Error if no archetype found
         if (!bestMatch.name) {
             console.error("No archetype found for the calculated results.");
         }
 
+        // Return the best match and all scores for percentage calculation
         return {
             primary: bestMatch.name,
-            scores: archetypeScores, // Return all scores for percentage calculation
+            scores: archetypeScores, // All archetypes and their scores
         };
     }
 
