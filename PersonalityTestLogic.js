@@ -11,8 +11,15 @@ export function usePersonalityTest() {
     });
 
     const handleAnswer = (questionIndex, value) => {
-        console.log(`Answer received for question ${questionIndex + 1}: ${value}`);
-        
+        // Log the value being passed for debugging
+        console.log(`Question Index: ${questionIndex + 1} - "Value:"`, value);
+
+        // Ensure the value is within the acceptable range (e.g., 1 to 5)
+        if (value < 1 || value > 5) {
+            console.error(`Invalid value received for question ${questionIndex + 1}:`, value);
+            return;
+        }
+
         const newAnswers = [...answers];
         newAnswers[questionIndex] = value;
         setAnswers(newAnswers);
@@ -72,7 +79,7 @@ export function usePersonalityTest() {
                     Neuroticism: "low",
                 },
             },
-            // ... other archetypes
+            // Add remaining archetypes...
         ];
 
         function getTraitMatchScore(traitScore, traitThreshold) {
