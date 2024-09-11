@@ -21,7 +21,7 @@ export function usePersonalityTest() {
     const updateTraits = (questionIndex, value) => {
         const updatedTraits = { ...traits };
 
-        // Trait calculation logic, adjust ranges as per the new design
+        // Trait calculation logic
         if (questionIndex >= 0 && questionIndex <= 9) {
             updatedTraits.Openness += value - 3;
         } else if (questionIndex >= 10 && questionIndex <= 19) {
@@ -71,56 +71,7 @@ export function usePersonalityTest() {
                     Neuroticism: "low",
                 },
             },
-            {
-                name: "Olive Branch",
-                thresholds: {
-                    Openness: "moderate",
-                    Conscientiousness: "high",
-                    Extraversion: "high",
-                    Agreeableness: "high",
-                    Neuroticism: "low",
-                },
-            },
-            {
-                name: "Papyros",
-                thresholds: {
-                    Openness: "high",
-                    Conscientiousness: "low",
-                    Extraversion: "low",
-                    Agreeableness: "lowToModerate",
-                    Neuroticism: "moderateToHigh",
-                },
-            },
-            {
-                name: "Lyra",
-                thresholds: {
-                    Openness: "moderate",
-                    Conscientiousness: "moderate",
-                    Extraversion: "high",
-                    Agreeableness: "high",
-                    Neuroticism: "low",
-                },
-            },
-            {
-                name: "Dory",
-                thresholds: {
-                    Openness: "low",
-                    Conscientiousness: "moderateToHigh",
-                    Extraversion: "high",
-                    Agreeableness: "low",
-                    Neuroticism: "lowToModerate",
-                },
-            },
-            {
-                name: "Estia",
-                thresholds: {
-                    Openness: "low",
-                    Conscientiousness: "low",
-                    Extraversion: "low",
-                    Agreeableness: "moderateToHigh",
-                    Neuroticism: "low",
-                },
-            },
+            // Add other archetypes here...
         ];
 
         // Helper function to calculate how well a trait matches the archetype
@@ -155,12 +106,16 @@ export function usePersonalityTest() {
             return { name: archetype.name, score };
         });
 
-        // Find the archetype with the highest score
-        const bestMatch = archetypeScores.reduce((best, current) => {
-            return current.score > best.score ? current : best;
-        }, { name: null, score: 0 });
+        // Calculate the total score
+        const totalScore = archetypeScores.reduce((sum, archetype) => sum + archetype.score, 0);
 
-        return { primary: bestMatch.name }; // Return the best match
+        // Convert each archetype score to a percentage
+        const archetypePercentages = archetypeScores.map(archetype => ({
+            name: archetype.name,
+            percentage: ((archetype.score / totalScore) * 100).toFixed(2) // Convert to percentage
+        }));
+
+        return archetypePercentages; // Return the percentages
     }
 
     return {
