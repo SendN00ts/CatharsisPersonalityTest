@@ -38,7 +38,7 @@ export function usePersonalityTest() {
         setTraits(updatedTraits); // Update traits state
     };
 
-    // Calculate Results and Percentages
+    // Function to calculate percentages for each archetype
     function calculateResults() {
         const { Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism } = traits;
 
@@ -69,6 +69,7 @@ export function usePersonalityTest() {
             // Continue adding other archetypes...
         ];
 
+        // Helper to calculate match score based on threshold logic
         function getTraitMatchScore(traitScore, traitThreshold) {
             if (traitThreshold === "high") {
                 return traitScore >= 5 ? 1 : 0;
@@ -86,7 +87,7 @@ export function usePersonalityTest() {
             return 0;
         }
 
-        // Calculate scores for each archetype
+        // Calculate match scores for each archetype
         const archetypeScores = archetypes.map((archetype) => {
             const thresholds = archetype.thresholds;
 
@@ -100,10 +101,19 @@ export function usePersonalityTest() {
             return { name: archetype.name, score };
         });
 
-        // Log the calculated archetype scores
-        console.log("Archetype Scores:", archetypeScores);
+        console.log("Archetype Scores:", archetypeScores); // Log scores for debugging
 
-        // Get the archetype with the highest score
+        // Get the total score sum for percentage calculation
+        const totalScore = archetypeScores.reduce((total, archetype) => total + archetype.score, 0);
+
+        // Calculate the percentage for each archetype
+        const archetypePercentages = archetypeScores.map((archetype) => ({
+            name: archetype.name,
+            percentage: ((archetype.score / totalScore) * 100).toFixed(2) + '%'
+        }));
+
+        console.log("Archetype Percentages:", archetypePercentages);
+
         const bestMatch = archetypeScores.reduce((best, current) => {
             return current.score > best.score ? current : best;
         }, { name: null, score: 0 });
@@ -115,10 +125,9 @@ export function usePersonalityTest() {
             console.error("No archetype found for the calculated results.");
         }
 
-        // Return the best match and all scores for percentage calculation
         return {
             primary: bestMatch.name,
-            scores: archetypeScores, // All archetypes and their scores
+            percentages: archetypePercentages, // Return all archetype percentages
         };
     }
 
