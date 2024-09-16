@@ -1,8 +1,7 @@
-import { useState } from 'react';
+import { useState } from "react";
 
-// Hook: Personality Test Logic
 export function usePersonalityTest() {
-    const [answers, setAnswers] = useState(Array(50).fill(null)); // 50 questions
+    const [answers, setAnswers] = useState(Array(50).fill(null)); // Example for 50 questions
     const [traits, setTraits] = useState({
         Openness: 0,
         Conscientiousness: 0,
@@ -33,25 +32,18 @@ export function usePersonalityTest() {
 
         const updatedTraits = { ...traits };
 
-        // No normalization required if using -3 to 3 scale directly
         const normalizedNewValue = newValue;
-        const normalizedPreviousValue = previousValue !== null ? previousValue : 0; // Use previous value if it exists
+        const normalizedPreviousValue = previousValue !== null ? previousValue : 0;
 
-        // Subtract the effect of the previous answer and add the new answer
         if (questionIndex >= 0 && questionIndex <= 9) {
-            // Openness
             updatedTraits.Openness += normalizedNewValue - normalizedPreviousValue;
         } else if (questionIndex >= 10 && questionIndex <= 19) {
-            // Conscientiousness
             updatedTraits.Conscientiousness += normalizedNewValue - normalizedPreviousValue;
         } else if (questionIndex >= 20 && questionIndex <= 29) {
-            // Extraversion
             updatedTraits.Extraversion += normalizedNewValue - normalizedPreviousValue;
         } else if (questionIndex >= 30 && questionIndex <= 39) {
-            // Agreeableness
             updatedTraits.Agreeableness += normalizedNewValue - normalizedPreviousValue;
         } else if (questionIndex >= 40 && questionIndex <= 49) {
-            // Neuroticism
             updatedTraits.Neuroticism += normalizedNewValue - normalizedPreviousValue;
         }
 
