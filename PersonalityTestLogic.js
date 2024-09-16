@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 
 export function usePersonalityTest() {
     const [answers, setAnswers] = useState(Array(50).fill(null)); // Example for 50 questions
@@ -32,22 +32,19 @@ export function usePersonalityTest() {
 
         const updatedTraits = { ...traits };
 
-        // Subtract the effect of the previous answer and add the new answer
+        const normalizedNewValue = newValue;
+        const normalizedPreviousValue = previousValue !== null ? previousValue : 0;
+
         if (questionIndex >= 0 && questionIndex <= 9) {
-            // Openness
-            updatedTraits.Openness += newValue - (previousValue || 0);
+            updatedTraits.Openness += normalizedNewValue - normalizedPreviousValue;
         } else if (questionIndex >= 10 && questionIndex <= 19) {
-            // Conscientiousness
-            updatedTraits.Conscientiousness += newValue - (previousValue || 0);
+            updatedTraits.Conscientiousness += normalizedNewValue - normalizedPreviousValue;
         } else if (questionIndex >= 20 && questionIndex <= 29) {
-            // Extraversion
-            updatedTraits.Extraversion += newValue - (previousValue || 0);
+            updatedTraits.Extraversion += normalizedNewValue - normalizedPreviousValue;
         } else if (questionIndex >= 30 && questionIndex <= 39) {
-            // Agreeableness
-            updatedTraits.Agreeableness += newValue - (previousValue || 0);
+            updatedTraits.Agreeableness += normalizedNewValue - normalizedPreviousValue;
         } else if (questionIndex >= 40 && questionIndex <= 49) {
-            // Neuroticism
-            updatedTraits.Neuroticism += newValue - (previousValue || 0);
+            updatedTraits.Neuroticism += normalizedNewValue - normalizedPreviousValue;
         }
 
         setTraits(updatedTraits); // Save the updated traits
@@ -164,4 +161,31 @@ export function usePersonalityTest() {
 
             const score =
                 getTraitMatchScore(Openness, thresholds.Openness) +
-                getTraitMatchScore(Conscientiousness
+                getTraitMatchScore(Conscientiousness, thresholds.Conscientiousness) +
+                getTraitMatchScore(Extraversion, thresholds.Extraversion) +
+                getTraitMatchScore(Agreeableness, thresholds.Agreeableness) +
+                getTraitMatchScore(Neuroticism, thresholds.Neuroticism);
+
+            return { name: archetype.name, score };
+        });
+
+        console.log("Archetype Scores calculated:", archetypeScores);
+
+        const bestMatch = archetypeScores.reduce((best, current) => {
+            return current.score > best.score ? current : best;
+        }, { name: null, score: 0 });
+
+        console.log("Best match archetype:", bestMatch);
+
+        return {
+            primary: bestMatch.name,
+            scores: archetypeScores,
+        };
+    }
+
+    return {
+        answers,
+        handleAnswer,
+        calculateResults,
+    };
+}
