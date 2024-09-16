@@ -33,7 +33,7 @@ export function usePersonalityTest() {
         const updatedTraits = { ...traits };
 
         // Adjust the mapping to follow the correct scaling of values (-3 to +3)
-        const normalizeValue = (value) => value - 4; // Centralize value around 0 (1 maps to -3, 7 maps to +3)
+        const normalizeValue = (value) => value - 3; // Centralize value around 0 (1 maps to -3, 7 maps to +3)
 
         const normalizedNewValue = normalizeValue(newValue);
         const normalizedPreviousValue = previousValue !== null ? normalizeValue(previousValue) : 0; // Normalize previous value if it exists
