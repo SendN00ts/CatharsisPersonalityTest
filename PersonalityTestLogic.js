@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+// Hook: Personality Test Logic
 export function usePersonalityTest() {
     const [answers, setAnswers] = useState(Array(50).fill(null)); // 50 questions
     const [traits, setTraits] = useState({
@@ -32,7 +33,7 @@ export function usePersonalityTest() {
 
         const updatedTraits = { ...traits };
 
-        // Adjust the mapping (no normalization required if using -3 to 3 scale directly)
+        // No normalization required if using -3 to 3 scale directly
         const normalizedNewValue = newValue;
         const normalizedPreviousValue = previousValue !== null ? previousValue : 0; // Use previous value if it exists
 
@@ -84,7 +85,66 @@ export function usePersonalityTest() {
                     Neuroticism: "low",
                 },
             },
-            // Other archetypes...
+            {
+                name: "Helm",
+                thresholds: {
+                    Openness: "high",
+                    Conscientiousness: "high",
+                    Extraversion: "high",
+                    Agreeableness: "moderate",
+                    Neuroticism: "low",
+                },
+            },
+            {
+                name: "Olive Branch",
+                thresholds: {
+                    Openness: "moderate",
+                    Conscientiousness: "high",
+                    Extraversion: "high",
+                    Agreeableness: "high",
+                    Neuroticism: "low",
+                },
+            },
+            {
+                name: "Papyros",
+                thresholds: {
+                    Openness: "high",
+                    Conscientiousness: "low",
+                    Extraversion: "low",
+                    Agreeableness: "lowToModerate",
+                    Neuroticism: "moderateToHigh",
+                },
+            },
+            {
+                name: "Lyra",
+                thresholds: {
+                    Openness: "moderate",
+                    Conscientiousness: "moderate",
+                    Extraversion: "high",
+                    Agreeableness: "high",
+                    Neuroticism: "low",
+                },
+            },
+            {
+                name: "Dory",
+                thresholds: {
+                    Openness: "low",
+                    Conscientiousness: "moderateToHigh",
+                    Extraversion: "high",
+                    Agreeableness: "low",
+                    Neuroticism: "lowToModerate",
+                },
+            },
+            {
+                name: "Estia",
+                thresholds: {
+                    Openness: "low",
+                    Conscientiousness: "low",
+                    Extraversion: "low",
+                    Agreeableness: "moderateToHigh",
+                    Neuroticism: "low",
+                },
+            },
         ];
 
         function getTraitMatchScore(traitScore, traitThreshold) {
