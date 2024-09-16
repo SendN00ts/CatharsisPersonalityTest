@@ -33,27 +33,8 @@ export function usePersonalityTest() {
 
         const updatedTraits = { ...traits };
 
-        // Proper normalization of the 1-7 scale
-        const normalizeValue = (value) => {
-            switch (value) {
-                case 1:
-                    return -3; // Fully disagree
-                case 2:
-                    return -2; // Rather disagree
-                case 3:
-                    return -1; // Slightly disagree
-                case 4:
-                    return 0;  // Neutral
-                case 5:
-                    return +1; // Slightly agree
-                case 6:
-                    return +2; // Rather agree
-                case 7:
-                    return +3; // Fully agree
-                default:
-                    return 0;
-            }
-        };
+        // Adjust the mapping to follow the correct scaling of values (-3 to +3)
+        const normalizeValue = (value) => value - 4; // Centralize value around 0 (1 maps to -3, 7 maps to +3)
 
         const normalizedNewValue = normalizeValue(newValue);
         const normalizedPreviousValue = previousValue !== null ? normalizeValue(previousValue) : 0; // Normalize the previous value if it exists
