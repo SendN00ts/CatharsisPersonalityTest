@@ -13,19 +13,18 @@ export function usePersonalityTest() {
     const handleAnswer = (questionIndex, newValue) => {
         console.log(`Question Index: ${questionIndex + 1} - "New Value:"`, newValue);
 
-        // Ensure the value is within the acceptable range (e.g., 1 to 7)
+        // Ensure the value is within the acceptable range (1 to 7)
         if (newValue < 1 || newValue > 7) {
             console.error(`Invalid value received for question ${questionIndex + 1}:`, newValue);
             return;
         }
 
-        const previousAnswer = answers[questionIndex]; // Get the previous answer to the question
+        const previousAnswer = answers[questionIndex]; // Get the previous answer for the question
         const newAnswers = [...answers];
-        newAnswers[questionIndex] = newValue;
-        setAnswers(newAnswers);
+        newAnswers[questionIndex] = newValue; // Update the new answer
+        setAnswers(newAnswers); // Save the updated answers
 
-        updateTraits(questionIndex, newValue, previousAnswer); // Pass previous answer for adjustment
-        console.log(`Updated answers after question ${questionIndex + 1}:`, newAnswers);
+        updateTraits(questionIndex, newValue, previousAnswer); // Pass both new and previous answer to update traits
     };
 
     const updateTraits = (questionIndex, newValue, previousValue) => {
@@ -37,9 +36,9 @@ export function usePersonalityTest() {
         const normalizeValue = (value) => value - 4; // Centralize value around 0 (1 maps to -3, 7 maps to +3)
 
         const normalizedNewValue = normalizeValue(newValue);
-        const normalizedPreviousValue = previousValue !== null ? normalizeValue(previousValue) : 0; // Normalize the previous value if it exists
+        const normalizedPreviousValue = previousValue !== null ? normalizeValue(previousValue) : 0; // Normalize previous value if it exists
 
-        // Adjust traits by removing the effect of the previous answer and adding the new answer
+        // Subtract the effect of the previous answer and add the new answer
         if (questionIndex >= 0 && questionIndex <= 9) {
             // Openness
             updatedTraits.Openness += normalizedNewValue - normalizedPreviousValue;
@@ -57,7 +56,7 @@ export function usePersonalityTest() {
             updatedTraits.Neuroticism += normalizedNewValue - normalizedPreviousValue;
         }
 
-        setTraits(updatedTraits);
+        setTraits(updatedTraits); // Save the updated traits
         console.log(`After updating traits for question ${questionIndex + 1}:`, updatedTraits);
     };
 
