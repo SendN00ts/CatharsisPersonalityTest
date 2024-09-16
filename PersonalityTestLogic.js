@@ -32,25 +32,19 @@ export function usePersonalityTest() {
 
         const updatedTraits = { ...traits };
 
-        // Adjust the mapping (no normalization required if using -3 to 3 scale directly)
         const normalizedNewValue = newValue;
         const normalizedPreviousValue = previousValue !== null ? previousValue : 0; // Use previous value if it exists
 
         // Subtract the effect of the previous answer and add the new answer
         if (questionIndex >= 0 && questionIndex <= 9) {
-            // Openness
             updatedTraits.Openness += normalizedNewValue - normalizedPreviousValue;
         } else if (questionIndex >= 10 && questionIndex <= 19) {
-            // Conscientiousness
             updatedTraits.Conscientiousness += normalizedNewValue - normalizedPreviousValue;
         } else if (questionIndex >= 20 && questionIndex <= 29) {
-            // Extraversion
             updatedTraits.Extraversion += normalizedNewValue - normalizedPreviousValue;
         } else if (questionIndex >= 30 && questionIndex <= 39) {
-            // Agreeableness
             updatedTraits.Agreeableness += normalizedNewValue - normalizedPreviousValue;
         } else if (questionIndex >= 40 && questionIndex <= 49) {
-            // Neuroticism
             updatedTraits.Neuroticism += normalizedNewValue - normalizedPreviousValue;
         }
 
