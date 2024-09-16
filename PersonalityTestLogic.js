@@ -13,8 +13,8 @@ export function usePersonalityTest() {
     const handleAnswer = (questionIndex, newValue) => {
         console.log(`Question Index: ${questionIndex + 1} - "New Value:"`, newValue);
 
-        // Ensure the value is within the acceptable range (1 to 7)
-        if (newValue < 1 || newValue > 7) {
+        // Ensure the value is within the acceptable range (-3 to 3)
+        if (newValue < -3 || newValue > 3) {
             console.error(`Invalid value received for question ${questionIndex + 1}:`, newValue);
             return;
         }
@@ -32,28 +32,22 @@ export function usePersonalityTest() {
 
         const updatedTraits = { ...traits };
 
-        // Adjust the mapping to follow the correct scaling of values (-3 to +3)
-        const normalizeValue = (value) => value - 3; // Centralize value around 0 (1 maps to -3, 7 maps to +3)
-
-        const normalizedNewValue = normalizeValue(newValue);
-        const normalizedPreviousValue = previousValue !== null ? normalizeValue(previousValue) : 0; // Normalize previous value if it exists
-
         // Subtract the effect of the previous answer and add the new answer
         if (questionIndex >= 0 && questionIndex <= 9) {
             // Openness
-            updatedTraits.Openness += normalizedNewValue - normalizedPreviousValue;
+            updatedTraits.Openness += newValue - (previousValue || 0);
         } else if (questionIndex >= 10 && questionIndex <= 19) {
             // Conscientiousness
-            updatedTraits.Conscientiousness += normalizedNewValue - normalizedPreviousValue;
+            updatedTraits.Conscientiousness += newValue - (previousValue || 0);
         } else if (questionIndex >= 20 && questionIndex <= 29) {
             // Extraversion
-            updatedTraits.Extraversion += normalizedNewValue - normalizedPreviousValue;
+            updatedTraits.Extraversion += newValue - (previousValue || 0);
         } else if (questionIndex >= 30 && questionIndex <= 39) {
             // Agreeableness
-            updatedTraits.Agreeableness += normalizedNewValue - normalizedPreviousValue;
+            updatedTraits.Agreeableness += newValue - (previousValue || 0);
         } else if (questionIndex >= 40 && questionIndex <= 49) {
             // Neuroticism
-            updatedTraits.Neuroticism += normalizedNewValue - normalizedPreviousValue;
+            updatedTraits.Neuroticism += newValue - (previousValue || 0);
         }
 
         setTraits(updatedTraits); // Save the updated traits
@@ -170,31 +164,4 @@ export function usePersonalityTest() {
 
             const score =
                 getTraitMatchScore(Openness, thresholds.Openness) +
-                getTraitMatchScore(Conscientiousness, thresholds.Conscientiousness) +
-                getTraitMatchScore(Extraversion, thresholds.Extraversion) +
-                getTraitMatchScore(Agreeableness, thresholds.Agreeableness) +
-                getTraitMatchScore(Neuroticism, thresholds.Neuroticism);
-
-            return { name: archetype.name, score };
-        });
-
-        console.log("Archetype Scores calculated:", archetypeScores);
-
-        const bestMatch = archetypeScores.reduce((best, current) => {
-            return current.score > best.score ? current : best;
-        }, { name: null, score: 0 });
-
-        console.log("Best match archetype:", bestMatch);
-
-        return {
-            primary: bestMatch.name,
-            scores: archetypeScores,
-        };
-    }
-
-    return {
-        answers,
-        handleAnswer,
-        calculateResults,
-    };
-}
+                getTraitMatchScore(Conscientiousness
