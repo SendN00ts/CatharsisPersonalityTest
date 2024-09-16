@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from 'react';
 
 export function usePersonalityTest() {
     const [answers, setAnswers] = useState(Array(50).fill(null)); // Example for 50 questions
@@ -13,8 +13,8 @@ export function usePersonalityTest() {
     const handleAnswer = (questionIndex, newValue) => {
         console.log(`Question Index: ${questionIndex + 1} - "New Value:"`, newValue);
 
-        // Ensure the value is within the acceptable range (-3 to 3)
-        if (newValue < -3 || newValue > 3) {
+        // Ensure the value is within the acceptable range (1 to 7)
+        if (newValue < 1 || newValue > 7) {
             console.error(`Invalid value received for question ${questionIndex + 1}:`, newValue);
             return;
         }
@@ -32,9 +32,24 @@ export function usePersonalityTest() {
 
         const updatedTraits = { ...traits };
 
-        const normalizedNewValue = newValue;
-        const normalizedPreviousValue = previousValue !== null ? previousValue : 0;
+        // Map the scale value (1 to 7) to the corresponding range of -3 to +3
+        const mapValueToRange = (value) => {
+            const mapping = {
+                1: -3,
+                2: -2,
+                3: -1,
+                4: 0,
+                5: +1,
+                6: +2,
+                7: +3
+            };
+            return mapping[value] || 0; // Default to 0 if invalid value
+        };
 
+        const normalizedNewValue = mapValueToRange(newValue);
+        const normalizedPreviousValue = previousValue !== null ? mapValueToRange(previousValue) : 0; // Normalize previous value if it exists
+
+        // Subtract the effect of the previous answer and add the new answer
         if (questionIndex >= 0 && questionIndex <= 9) {
             updatedTraits.Openness += normalizedNewValue - normalizedPreviousValue;
         } else if (questionIndex >= 10 && questionIndex <= 19) {
