@@ -1,7 +1,8 @@
 import { useState } from 'react';
 
+// Hook: Personality Test Logic
 export function usePersonalityTest() {
-    const [answers, setAnswers] = useState(Array(50).fill(null)); // Example for 50 questions
+    const [answers, setAnswers] = useState(Array(50).fill(null)); // 50 questions
     const [traits, setTraits] = useState({
         Openness: 0,
         Conscientiousness: 0,
@@ -11,11 +12,11 @@ export function usePersonalityTest() {
     });
 
     const handleAnswer = (questionIndex, newValue) => {
-        console.log(Question Index: ${questionIndex + 1} - "New Value:", newValue);
+        console.log(`Question Index: ${questionIndex + 1} - "New Value:"`, newValue);
 
-        // Ensure the value is within the acceptable range (1 to 7)
-        if (newValue < 1 || newValue > 7) {
-            console.error(Invalid value received for question ${questionIndex + 1}:, newValue);
+        // Ensure the value is within the acceptable range (-3 to 3)
+        if (newValue < -3 || newValue > 3) {
+            console.error(`Invalid value received for question ${questionIndex + 1}:`, newValue);
             return;
         }
 
@@ -28,15 +29,13 @@ export function usePersonalityTest() {
     };
 
     const updateTraits = (questionIndex, newValue, previousValue) => {
-        console.log(Before updating traits for question ${questionIndex + 1}:, traits);
+        console.log(`Before updating traits for question ${questionIndex + 1}:`, traits);
 
         const updatedTraits = { ...traits };
 
-        // Adjust the mapping to follow the correct scaling of values (-3 to +3)
-        const normalizeValue = (value) => value - 3; // Centralize value around 0 (1 maps to -3, 7 maps to +3)
-
-        const normalizedNewValue = normalizeValue(newValue);
-        const normalizedPreviousValue = previousValue !== null ? normalizeValue(previousValue) : 0; // Normalize previous value if it exists
+        // No normalization required if using -3 to 3 scale directly
+        const normalizedNewValue = newValue;
+        const normalizedPreviousValue = previousValue !== null ? previousValue : 0; // Use previous value if it exists
 
         // Subtract the effect of the previous answer and add the new answer
         if (questionIndex >= 0 && questionIndex <= 9) {
@@ -57,7 +56,7 @@ export function usePersonalityTest() {
         }
 
         setTraits(updatedTraits); // Save the updated traits
-        console.log(After updating traits for question ${questionIndex + 1}:, updatedTraits);
+        console.log(`After updating traits for question ${questionIndex + 1}:`, updatedTraits);
     };
 
     function calculateResults() {
