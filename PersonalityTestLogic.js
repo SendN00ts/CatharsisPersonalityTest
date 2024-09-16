@@ -32,27 +32,33 @@ export function usePersonalityTest() {
 
         const updatedTraits = { ...traits };
 
-        // Adjust the mapping to follow the correct scaling of values (-3 to +3)
-        const normalizeValue = (value) => value - 3; // Centralize value around 0 (1 maps to -3, 7 maps to +3)
+        // Map the scale value (1 to 7) to the corresponding range of -3 to +3
+        const mapValueToRange = (value) => {
+            const mapping = {
+                1: -3,
+                2: -2,
+                3: -1,
+                4: 0,
+                5: +1,
+                6: +2,
+                7: +3
+            };
+            return mapping[value] || 0; // Default to 0 if invalid value
+        };
 
-        const normalizedNewValue = normalizeValue(newValue);
-        const normalizedPreviousValue = previousValue !== null ? normalizeValue(previousValue) : 0; // Normalize previous value if it exists
+        const normalizedNewValue = mapValueToRange(newValue);
+        const normalizedPreviousValue = previousValue !== null ? mapValueToRange(previousValue) : 0; // Normalize previous value if it exists
 
         // Subtract the effect of the previous answer and add the new answer
         if (questionIndex >= 0 && questionIndex <= 9) {
-            // Openness
             updatedTraits.Openness += normalizedNewValue - normalizedPreviousValue;
         } else if (questionIndex >= 10 && questionIndex <= 19) {
-            // Conscientiousness
             updatedTraits.Conscientiousness += normalizedNewValue - normalizedPreviousValue;
         } else if (questionIndex >= 20 && questionIndex <= 29) {
-            // Extraversion
             updatedTraits.Extraversion += normalizedNewValue - normalizedPreviousValue;
         } else if (questionIndex >= 30 && questionIndex <= 39) {
-            // Agreeableness
             updatedTraits.Agreeableness += normalizedNewValue - normalizedPreviousValue;
         } else if (questionIndex >= 40 && questionIndex <= 49) {
-            // Neuroticism
             updatedTraits.Neuroticism += normalizedNewValue - normalizedPreviousValue;
         }
 
