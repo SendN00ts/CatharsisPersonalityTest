@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState } from 'react';
 
+// Hook: Personality Test Logic
 export function usePersonalityTest() {
-    const [answers, setAnswers] = useState(Array(50).fill(null)); // Example for 50 questions
+    const [answers, setAnswers] = useState(Array(50).fill(null)); // 50 questions
     const [traits, setTraits] = useState({
         Openness: 0,
         Conscientiousness: 0,
@@ -32,19 +33,20 @@ export function usePersonalityTest() {
 
         const updatedTraits = { ...traits };
 
-        const normalizedNewValue = newValue;
-        const normalizedPreviousValue = previousValue !== null ? previousValue : 0;
+        // Use previous value if it exists
+        const normalizedPreviousValue = previousValue !== null ? previousValue : 0; 
 
+        // Update traits based on the question range (0-9 Openness, 10-19 Conscientiousness, etc.)
         if (questionIndex >= 0 && questionIndex <= 9) {
-            updatedTraits.Openness += normalizedNewValue - normalizedPreviousValue;
+            updatedTraits.Openness += newValue - normalizedPreviousValue;
         } else if (questionIndex >= 10 && questionIndex <= 19) {
-            updatedTraits.Conscientiousness += normalizedNewValue - normalizedPreviousValue;
+            updatedTraits.Conscientiousness += newValue - normalizedPreviousValue;
         } else if (questionIndex >= 20 && questionIndex <= 29) {
-            updatedTraits.Extraversion += normalizedNewValue - normalizedPreviousValue;
+            updatedTraits.Extraversion += newValue - normalizedPreviousValue;
         } else if (questionIndex >= 30 && questionIndex <= 39) {
-            updatedTraits.Agreeableness += normalizedNewValue - normalizedPreviousValue;
+            updatedTraits.Agreeableness += newValue - normalizedPreviousValue;
         } else if (questionIndex >= 40 && questionIndex <= 49) {
-            updatedTraits.Neuroticism += normalizedNewValue - normalizedPreviousValue;
+            updatedTraits.Neuroticism += newValue - normalizedPreviousValue;
         }
 
         setTraits(updatedTraits); // Save the updated traits
@@ -77,66 +79,7 @@ export function usePersonalityTest() {
                     Neuroticism: "low",
                 },
             },
-            {
-                name: "Helm",
-                thresholds: {
-                    Openness: "high",
-                    Conscientiousness: "high",
-                    Extraversion: "high",
-                    Agreeableness: "moderate",
-                    Neuroticism: "low",
-                },
-            },
-            {
-                name: "Olive Branch",
-                thresholds: {
-                    Openness: "moderate",
-                    Conscientiousness: "high",
-                    Extraversion: "high",
-                    Agreeableness: "high",
-                    Neuroticism: "low",
-                },
-            },
-            {
-                name: "Papyros",
-                thresholds: {
-                    Openness: "high",
-                    Conscientiousness: "low",
-                    Extraversion: "low",
-                    Agreeableness: "lowToModerate",
-                    Neuroticism: "moderateToHigh",
-                },
-            },
-            {
-                name: "Lyra",
-                thresholds: {
-                    Openness: "moderate",
-                    Conscientiousness: "moderate",
-                    Extraversion: "high",
-                    Agreeableness: "high",
-                    Neuroticism: "low",
-                },
-            },
-            {
-                name: "Dory",
-                thresholds: {
-                    Openness: "low",
-                    Conscientiousness: "moderateToHigh",
-                    Extraversion: "high",
-                    Agreeableness: "low",
-                    Neuroticism: "lowToModerate",
-                },
-            },
-            {
-                name: "Estia",
-                thresholds: {
-                    Openness: "low",
-                    Conscientiousness: "low",
-                    Extraversion: "low",
-                    Agreeableness: "moderateToHigh",
-                    Neuroticism: "low",
-                },
-            },
+            // Add other archetypes here...
         ];
 
         function getTraitMatchScore(traitScore, traitThreshold) {
