@@ -196,52 +196,24 @@ export function usePersonalityTest() {
             return archetypes.map((archetype) => ({ name: archetype.name, percentage: 0 }));
         }
 
-        // Assign the top archetype 55% and calculate remaining percentages
-        const topPercentage = 55; // Set top archetype percentage
-        const remainingPercentage = 100 - topPercentage; // Remaining 45% to distribute
-        const remainingArchetypesCount = sortedArchetypes.length - 1;
-
-        // Distribute remaining percentages based on relative scores
-        let distributedPercentages = sortedArchetypes.slice(1).map((archetype, index) => {
-            // Gradually decrease percentage for each subsequent archetype
-            const relativeWeight = (remainingPercentage / remainingArchetypesCount) *
-                ((remainingArchetypesCount - index) / remainingArchetypesCount);
-            return {
-                ...archetype,
-                percentage: relativeWeight
-            };
-        });
-
-        // Add the top archetype with 55% to the result
-        const finalPercentages = [
-            { name: sortedArchetypes[0].name, percentage: topPercentage },
-            ...distributedPercentages,
-        ];
-
-        // Round percentages and ensure they sum to exactly 100%
-        let roundedPercentages = finalPercentages.map((a) => ({
-            ...a,
-            percentage: Math.round(a.percentage),
+        // Calculate percentages for each archetype based on their score
+        const finalPercentages = sortedArchetypes.map((archetype) => ({
+            name: archetype.name,
+            percentage: Math.round((archetype.score / totalScore) * 100),
         }));
 
-        // Adjust the top archetype's percentage if the sum is off due to rounding
-        const totalRoundedPercentage = roundedPercentages.reduce(
-            (sum, a) => sum + a.percentage,
-            0
-        );
+        // Ensure the percentages sum to exactly 100%
+        const totalPercentage = finalPercentages.reduce((sum, archetype) => sum + archetype.percentage, 0);
+        const difference = 100 - totalPercentage;
 
-        if (totalRoundedPercentage !== 100) {
-            roundedPercentages = roundedPercentages.map((a) =>
-                a.name === sortedArchetypes[0].name
-                    ? { ...a, percentage: a.percentage + (100 - totalRoundedPercentage) }
-                    : a
-            );
+        if (difference !== 0) {
+            finalPercentages[0].percentage += difference; // Adjust for rounding differences
         }
 
         // Log the percentage correlation for each archetype
-        console.log("Archetype Correlations:", roundedPercentages);
+        console.log("Archetype Correlations:", finalPercentages);
 
-        return roundedPercentages;
+        return finalPercentages;
     }
 
     return {
