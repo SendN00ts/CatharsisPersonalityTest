@@ -185,35 +185,37 @@ export function usePersonalityTest() {
             return { name: archetype.name, score };
         });
 
-        // Calculate the total score across all archetypes
-        const totalScore = archetypeScores.reduce((total, archetype) => total + archetype.score, 0);
+        // Sort the archetypes by score in descending order
+        const sortedArchetypes = archetypeScores.sort((a, b) => b.score - a.score);
+
+        // Calculate total score to normalize percentages
+        const totalScore = sortedArchetypes.reduce((sum, archetype) => sum + archetype.score, 0);
 
         // If total score is 0 (no match), return 0% for all archetypes
         if (totalScore === 0) {
             return archetypes.map((archetype) => ({ name: archetype.name, percentage: 0 }));
         }
 
-        // Find the archetype with the highest score
-        const topArchetype = archetypeScores.reduce((best, current) => {
-            return current.score > best.score ? current : best;
+        // Assign the top archetype 55% and calculate remaining percentages
+        const topPercentage = 55; // Set top archetype percentage
+        const remainingPercentage = 100 - topPercentage; // Remaining 45% to distribute
+        const remainingArchetypesCount = sortedArchetypes.length - 1;
+
+        // Distribute remaining percentages based on relative scores
+        let distributedPercentages = sortedArchetypes.slice(1).map((archetype, index) => {
+            // Gradually decrease percentage for each subsequent archetype
+            const relativeWeight = (remainingPercentage / remainingArchetypesCount) *
+                ((remainingArchetypesCount - index) / remainingArchetypesCount);
+            return {
+                ...archetype,
+                percentage: relativeWeight
+            };
         });
 
-        // Scale the top archetype to have 50-60% correlation
-        const topPercentage = 55; // Adjust this value as needed
-        const remainingPercentage = 100 - topPercentage;
-
-        // Calculate percentages for the remaining archetypes
-        const remainingArchetypes = archetypeScores
-            .filter((archetype) => archetype.name !== topArchetype.name)
-            .map((archetype) => ({
-                ...archetype,
-                percentage: (archetype.score / (totalScore - topArchetype.score)) * remainingPercentage,
-            }));
-
-        // Ensure the sum of percentages is exactly 100%
+        // Add the top archetype with 55% to the result
         const finalPercentages = [
-            { name: topArchetype.name, percentage: topPercentage },
-            ...remainingArchetypes,
+            { name: sortedArchetypes[0].name, percentage: topPercentage },
+            ...distributedPercentages,
         ];
 
         // Round percentages and ensure they sum to exactly 100%
@@ -222,7 +224,7 @@ export function usePersonalityTest() {
             percentage: Math.round(a.percentage),
         }));
 
-        // Adjust the top archetype's percentage if the sum is off by 1 due to rounding
+        // Adjust the top archetype's percentage if the sum is off due to rounding
         const totalRoundedPercentage = roundedPercentages.reduce(
             (sum, a) => sum + a.percentage,
             0
@@ -230,7 +232,7 @@ export function usePersonalityTest() {
 
         if (totalRoundedPercentage !== 100) {
             roundedPercentages = roundedPercentages.map((a) =>
-                a.name === topArchetype.name
+                a.name === sortedArchetypes[0].name
                     ? { ...a, percentage: a.percentage + (100 - totalRoundedPercentage) }
                     : a
             );
