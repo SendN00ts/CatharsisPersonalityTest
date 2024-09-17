@@ -34,7 +34,7 @@ export function usePersonalityTest() {
         const updatedTraits = { ...traits };
 
         // Use previous value if it exists
-        const normalizedPreviousValue = previousValue !== null ? previousValue : 0; 
+        const normalizedPreviousValue = previousValue !== null ? previousValue : 0;
 
         // Update traits based on the question range (0-9 Openness, 10-19 Conscientiousness, etc.)
         if (questionIndex >= 0 && questionIndex <= 9) {
@@ -79,18 +79,77 @@ export function usePersonalityTest() {
                     Neuroticism: "low",
                 },
             },
-            // Add other archetypes here...
+            {
+                name: "Helm",
+                thresholds: {
+                    Openness: "high",
+                    Conscientiousness: "high",
+                    Extraversion: "high",
+                    Agreeableness: "moderate",
+                    Neuroticism: "low",
+                },
+            },
+            {
+                name: "Olive Branch",
+                thresholds: {
+                    Openness: "moderate",
+                    Conscientiousness: "high",
+                    Extraversion: "high",
+                    Agreeableness: "high",
+                    Neuroticism: "low",
+                },
+            },
+            {
+                name: "Papyros",
+                thresholds: {
+                    Openness: "high",
+                    Conscientiousness: "low",
+                    Extraversion: "low",
+                    Agreeableness: "lowToModerate",
+                    Neuroticism: "moderateToHigh",
+                },
+            },
+            {
+                name: "Lyra",
+                thresholds: {
+                    Openness: "moderate",
+                    Conscientiousness: "moderate",
+                    Extraversion: "high",
+                    Agreeableness: "high",
+                    Neuroticism: "low",
+                },
+            },
+            {
+                name: "Dory",
+                thresholds: {
+                    Openness: "low",
+                    Conscientiousness: "moderateToHigh",
+                    Extraversion: "high",
+                    Agreeableness: "low",
+                    Neuroticism: "lowToModerate",
+                },
+            },
+            {
+                name: "Estia",
+                thresholds: {
+                    Openness: "low",
+                    Conscientiousness: "low",
+                    Extraversion: "low",
+                    Agreeableness: "moderateToHigh",
+                    Neuroticism: "low",
+                },
+            },
         ];
 
         function getTraitMatchScore(traitScore, traitThreshold) {
             if (traitThreshold === "high") {
-                return traitScore >= 5 ? 1 : 0;
+                return traitScore >= 4 ? 1 : 0;  // Lower the threshold to 4 for more inclusivity
             } else if (traitThreshold === "moderate") {
-                return traitScore >= 3 && traitScore <= 4 ? 1 : 0;
+                return traitScore >= 2 && traitScore <= 4 ? 1 : 0; // Adjust to be more flexible
             } else if (traitThreshold === "low") {
                 return traitScore <= 2 ? 1 : 0;
             } else if (traitThreshold === "lowOrHigh") {
-                return traitScore <= 2 || traitScore >= 5 ? 1 : 0;
+                return traitScore <= 2 || traitScore >= 4 ? 1 : 0; // Slightly lower the threshold for 'high'
             } else if (traitThreshold === "moderateToHigh") {
                 return traitScore >= 3 ? 1 : 0;
             } else if (traitThreshold === "lowToModerate") {
@@ -110,6 +169,11 @@ export function usePersonalityTest() {
                 getTraitMatchScore(Neuroticism, thresholds.Neuroticism);
 
             return { name: archetype.name, score };
+        });
+
+        // Debugging: log each archetype's score for better understanding
+        archetypes.forEach((archetype, index) => {
+            console.log(`Archetype: ${archetype.name}, Score: ${archetypeScores[index].score}`);
         });
 
         console.log("Archetype Scores calculated:", archetypeScores);
