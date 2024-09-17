@@ -71,8 +71,6 @@ export function usePersonalityTest() {
 
         const thresholds = getThresholds(minScorePerTrait, maxScorePerTrait);
 
-        console.log("Thresholds: ", thresholds);
-
         const archetypes = [
             {
                 name: "Labyrinth",
@@ -187,12 +185,17 @@ export function usePersonalityTest() {
             return { name: archetype.name, score };
         });
 
-        // Calculate total possible score for full match (5 points per archetype)
-        const totalMaxScore = 5; // Since each archetype has 5 traits to match (Openness, Conscientiousness, etc.)
+        // Calculate the total score across all archetypes
+        const totalScore = archetypeScores.reduce((total, archetype) => total + archetype.score, 0);
 
-        // Calculate percentage match for each archetype
+        // If total score is 0 (no match), return 0% for all archetypes
+        if (totalScore === 0) {
+            return archetypes.map((archetype) => ({ name: archetype.name, percentage: 0 }));
+        }
+
+        // Calculate percentage match for each archetype based on the total score
         const archetypePercentages = archetypeScores.map((archetypeScore) => {
-            const percentage = (archetypeScore.score / totalMaxScore) * 100; // Convert to percentage
+            const percentage = (archetypeScore.score / totalScore) * 100; // Normalize based on the total score
             return {
                 name: archetypeScore.name,
                 percentage: Math.round(percentage), // Round to nearest whole number
