@@ -75,92 +75,91 @@ export function usePersonalityTest() {
     const thresholds = getThresholds(minScorePerTrait, maxScorePerTrait);
 
     console.log("Thresholds: ", thresholds);
-    console.log("Final Trait values after all answers:", { Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism });
 
-        const archetypes = [
-            {
-                name: "Labyrinth",
-                thresholds: {
-                    Openness: "high",
-                    Conscientiousness: "low",
-                    Extraversion: "lowOrHigh",
-                    Agreeableness: "high",
-                    Neuroticism: "high",
-                },
+    const archetypes = [
+        {
+            name: "Labyrinth",
+            thresholds: {
+                Openness: "high",
+                Conscientiousness: "low",
+                Extraversion: "lowOrHigh",
+                Agreeableness: "high",
+                Neuroticism: "high",
             },
-            {
-                name: "Shield",
-                thresholds: {
-                    Openness: "low",
-                    Conscientiousness: "high",
-                    Extraversion: "low",
-                    Agreeableness: "moderateToHigh",
-                    Neuroticism: "low",
-                },
+        },
+        {
+            name: "Shield",
+            thresholds: {
+                Openness: "low",
+                Conscientiousness: "high",
+                Extraversion: "low",
+                Agreeableness: "moderateToHigh",
+                Neuroticism: "low",
             },
-            {
-                name: "Helm",
-                thresholds: {
-                    Openness: "high",
-                    Conscientiousness: "high",
-                    Extraversion: "high",
-                    Agreeableness: "moderate",
-                    Neuroticism: "low",
-                },
+        },
+        {
+            name: "Helm",
+            thresholds: {
+                Openness: "high",
+                Conscientiousness: "high",
+                Extraversion: "high",
+                Agreeableness: "moderate",
+                Neuroticism: "low",
             },
-            {
-                name: "Olive Branch",
-                thresholds: {
-                    Openness: "moderate",
-                    Conscientiousness: "high",
-                    Extraversion: "high",
-                    Agreeableness: "high",
-                    Neuroticism: "low",
-                },
+        },
+        {
+            name: "Olive Branch",
+            thresholds: {
+                Openness: "moderate",
+                Conscientiousness: "high",
+                Extraversion: "high",
+                Agreeableness: "high",
+                Neuroticism: "low",
             },
-            {
-                name: "Papyros",
-                thresholds: {
-                    Openness: "high",
-                    Conscientiousness: "low",
-                    Extraversion: "low",
-                    Agreeableness: "lowToModerate",
-                    Neuroticism: "moderateToHigh",
-                },
+        },
+        {
+            name: "Papyros",
+            thresholds: {
+                Openness: "high",
+                Conscientiousness: "low",
+                Extraversion: "low",
+                Agreeableness: "lowToModerate",
+                Neuroticism: "moderateToHigh",
             },
-            {
-                name: "Lyra",
-                thresholds: {
-                    Openness: "moderate",
-                    Conscientiousness: "moderate",
-                    Extraversion: "high",
-                    Agreeableness: "high",
-                    Neuroticism: "low",
-                },
+        },
+        {
+            name: "Lyra",
+            thresholds: {
+                Openness: "moderate",
+                Conscientiousness: "moderate",
+                Extraversion: "high",
+                Agreeableness: "high",
+                Neuroticism: "low",
             },
-            {
-                name: "Dory",
-                thresholds: {
-                    Openness: "low",
-                    Conscientiousness: "moderateToHigh",
-                    Extraversion: "high",
-                    Agreeableness: "low",
-                    Neuroticism: "lowToModerate",
-                },
+        },
+        {
+            name: "Dory",
+            thresholds: {
+                Openness: "low",
+                Conscientiousness: "moderateToHigh",
+                Extraversion: "high",
+                Agreeableness: "low",
+                Neuroticism: "lowToModerate",
             },
-            {
-                name: "Estia",
-                thresholds: {
-                    Openness: "low",
-                    Conscientiousness: "low",
-                    Extraversion: "low",
-                    Agreeableness: "moderateToHigh",
-                    Neuroticism: "low",
-                },
+        },
+        {
+            name: "Estia",
+            thresholds: {
+                Openness: "low",
+                Conscientiousness: "low",
+                Extraversion: "low",
+                Agreeableness: "moderateToHigh",
+                Neuroticism: "low",
             },
-        ];
+        },
+    ];
 
-      function getTraitMatchScore(traitScore, traitThreshold) {
+    function getTraitMatchScore(traitScore, traitThreshold) {
         if (traitThreshold === "high") {
             return traitScore >= thresholds.high ? 1 : 0;  // "High" is above 75% of the range
         } else if (traitThreshold === "moderate") {
@@ -188,6 +187,11 @@ export function usePersonalityTest() {
             getTraitMatchScore(Neuroticism, thresholds.Neuroticism);
 
         return { name: archetype.name, score };
+    });
+
+    // Debugging: log each archetype's score for better understanding
+    archetypes.forEach((archetype, index) => {
+        console.log(`Archetype: ${archetype.name}, Score: ${archetypeScores[index].score}`);
     });
 
     console.log("Archetype Scores calculated:", archetypeScores);
