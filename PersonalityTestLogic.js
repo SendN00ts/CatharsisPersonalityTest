@@ -196,19 +196,19 @@ export function usePersonalityTest() {
             return archetypes.map((archetype) => ({ name: archetype.name, percentage: 0 }));
         }
 
-        // Scale percentages based on score
+        // Apply scaling factor for the top archetype
+        const topArchetype = sortedArchetypes[0];
+        const scalingFactor = 1.5; // Boost the top archetype’s score by 1.5x
+        topArchetype.score *= scalingFactor;
+
+        // Recalculate total score with the boosted top archetype
+        const boostedTotalScore = sortedArchetypes.reduce((sum, archetype) => sum + archetype.score, 0);
+
+        // Calculate percentages based on boosted scores
         const finalPercentages = sortedArchetypes.map((archetype) => ({
             name: archetype.name,
-            percentage: Math.round((archetype.score / totalScore) * 100),
+            percentage: Math.round((archetype.score / boostedTotalScore) * 100),
         }));
-
-        // Ensure the percentages sum to exactly 100%
-        const totalPercentage = finalPercentages.reduce((sum, archetype) => sum + archetype.percentage, 0);
-        const difference = 100 - totalPercentage;
-
-        if (difference !== 0) {
-            finalPercentages[0].percentage += difference; // Adjust for rounding differences
-        }
 
         // Log the percentage correlation for each archetype
         console.log("Archetype Correlations:", finalPercentages);
