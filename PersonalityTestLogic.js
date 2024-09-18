@@ -57,7 +57,7 @@ export function usePersonalityTest() {
         const { Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism } = traits;
 
         // Get the number of questions per trait
-        const totalQuestionsPerTrait = 10; // Example for 10 questions per trait
+        const totalQuestionsPerTrait = 10;
         const maxScorePerTrait = totalQuestionsPerTrait * 3; // Maximum score is N * 3
         const minScorePerTrait = totalQuestionsPerTrait * -3; // Minimum score is N * -3
 
@@ -171,7 +171,7 @@ export function usePersonalityTest() {
             return 0;
         }
 
-        // Calculate the match score for each archetype
+        // Calculate match score for each archetype
         const archetypeScores = archetypes.map((archetype) => {
             const thresholds = archetype.thresholds;
 
@@ -185,19 +185,24 @@ export function usePersonalityTest() {
             return { name: archetype.name, score };
         });
 
-        // Sort the archetypes by score in descending order
+        // Sort archetypes by score
         const sortedArchetypes = archetypeScores.sort((a, b) => b.score - a.score);
 
         // Calculate total score to normalize percentages
         const totalScore = sortedArchetypes.reduce((sum, archetype) => sum + archetype.score, 0);
 
-        // Calculate percentages for each archetype based on their score
+        // If total score is 0, return 0% for all archetypes
+        if (totalScore === 0) {
+            return archetypes.map((archetype) => ({ name: archetype.name, percentage: 0 }));
+        }
+
+        // Calculate pure percentages for each archetype
         const finalPercentages = sortedArchetypes.map((archetype) => ({
             name: archetype.name,
             percentage: Math.round((archetype.score / totalScore) * 100),
         }));
 
-        // Ensure the percentages sum to exactly 100%
+        // Ensure percentages sum to exactly 100%
         const totalPercentage = finalPercentages.reduce((sum, archetype) => sum + archetype.percentage, 0);
         const difference = 100 - totalPercentage;
 
