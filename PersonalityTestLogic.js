@@ -191,11 +191,6 @@ export function usePersonalityTest() {
         // Calculate total score to normalize percentages
         const totalScore = sortedArchetypes.reduce((sum, archetype) => sum + archetype.score, 0);
 
-        // If total score is 0 (no match), return 0% for all archetypes
-        if (totalScore === 0) {
-            return archetypes.map((archetype) => ({ name: archetype.name, percentage: 0 }));
-        }
-
         // Calculate percentages for each archetype based on their score
         const finalPercentages = sortedArchetypes.map((archetype) => ({
             name: archetype.name,
