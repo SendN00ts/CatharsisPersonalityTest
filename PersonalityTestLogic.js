@@ -131,33 +131,16 @@ export function usePersonalityTest() {
             },
         ];
 
-        function getTraitMatchScore(traitScore, traitThreshold) {
-            if (traitThreshold === "high") {
-                return traitScore >= 5 ? 2 : 0;  // Boost score for strong matches
-            } else if (traitThreshold === "moderate") {
-                return traitScore >= 3 && traitScore <= 4 ? 1 : 0;  
-            } else if (traitThreshold === "low") {
-                return traitScore <= 2 ? 2 : 0;  // Boost low correlation as well
-            } else if (traitThreshold === "lowOrHigh") {
-                return traitScore <= 2 || traitScore >= 5 ? 1.5 : 0;  // Give more flexibility for low or high
-            } else if (traitThreshold === "moderateToHigh") {
-                return traitScore >= 3 ? 1.5 : 0;  
-            } else if (traitThreshold === "lowToModerate") {
-                return traitScore <= 3 ? 1.5 : 0; 
-            }
-            return 0;
-        }
-
         // Calculate a match score for each archetype
         const archetypeScores = archetypes.map((archetype) => {
             const thresholds = archetype.thresholds;
 
             const score =
-                getTraitMatchScore(Openness, thresholds.Openness) +
-                getTraitMatchScore(Conscientiousness, thresholds.Conscientiousness) +
-                getTraitMatchScore(Extraversion, thresholds.Extraversion) +
-                getTraitMatchScore(Agreeableness, thresholds.Agreeableness) +
-                getTraitMatchScore(Neuroticism, thresholds.Neuroticism);
+                (Openness >= 4 && thresholds.Openness === "high" ? 2 : Openness <= 2 && thresholds.Openness === "low" ? 2 : Openness === 3 && thresholds.Openness === "moderate" ? 1 : 0) +
+                (Conscientiousness >= 4 && thresholds.Conscientiousness === "high" ? 2 : Conscientiousness <= 2 && thresholds.Conscientiousness === "low" ? 2 : Conscientiousness === 3 && thresholds.Conscientiousness === "moderate" ? 1 : 0) +
+                (Extraversion >= 4 && thresholds.Extraversion === "high" ? 2 : Extraversion <= 2 && thresholds.Extraversion === "low" ? 2 : Extraversion === 3 && thresholds.Extraversion === "moderate" ? 1 : 0) +
+                (Agreeableness >= 4 && thresholds.Agreeableness === "high" ? 2 : Agreeableness <= 2 && thresholds.Agreeableness === "low" ? 2 : Agreeableness === 3 && thresholds.Agreeableness === "moderate" ? 1 : 0) +
+                (Neuroticism >= 4 && thresholds.Neuroticism === "high" ? 2 : Neuroticism <= 2 && thresholds.Neuroticism === "low" ? 2 : Neuroticism === 3 && thresholds.Neuroticism === "moderate" ? 1 : 0);
 
             return { name: archetype.name, score };
         });
@@ -165,19 +148,21 @@ export function usePersonalityTest() {
         // Sort archetypes by score in descending order
         const sortedArchetypes = archetypeScores.sort((a, b) => b.score - a.score);
 
-        // Total score to normalize percentages
+        // Normalize the scores by adjusting the scaling
         const totalScore = sortedArchetypes.reduce((sum, archetype) => sum + archetype.score, 0);
 
-        // Return 0% for all if no correlation
+        // If the total score is 0 (no correlation), return 0% for all archetypes
         if (totalScore === 0) {
             return archetypes.map((archetype) => ({ name: archetype.name, percentage: 0 }));
         }
 
-        // Distribute scores based on weight
-        const weightedPercentages = sortedArchetypes.map((archetype) => ({
-            name: archetype.name,
-            percentage: Math.round((archetype.score / totalScore) * 100),  // Scale the scores
-        }));
+        // Weighted scaling: top archetype will dominate but others still get their share
+        const weightedPercentages = sortedArchetypes.map(archetype => {
+            return {
+                name: archetype.name,
+                percentage: Math.round((archetype.score / totalScore) * 100) // Scale the scores to percentages
+            };
+        });
 
         console.log("Final archetype percentages:", weightedPercentages);
 
