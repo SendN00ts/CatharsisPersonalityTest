@@ -57,7 +57,7 @@ export function usePersonalityTest() {
         const { Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism } = traits;
 
         // Get the number of questions per trait
-        const totalQuestionsPerTrait = 10;
+        const totalQuestionsPerTrait = 10; // Example for 10 questions per trait
         const maxScorePerTrait = totalQuestionsPerTrait * 3; // Maximum score is N * 3
         const minScorePerTrait = totalQuestionsPerTrait * -3; // Minimum score is N * -3
 
@@ -185,32 +185,20 @@ export function usePersonalityTest() {
             return { name: archetype.name, score };
         });
 
-        // Sort archetypes by score
-        const sortedArchetypes = archetypeScores.sort((a, b) => b.score - a.score);
+        // Normalize the scores so they add up to 100%
+        const totalScore = archetypeScores.reduce((sum, archetype) => sum + archetype.score, 0);
 
-        // Calculate total score to normalize percentages
-        const totalScore = sortedArchetypes.reduce((sum, archetype) => sum + archetype.score, 0);
-
-        // If total score is 0, return 0% for all archetypes
+        // If total score is 0 (no match), return 0% for all archetypes
         if (totalScore === 0) {
             return archetypes.map((archetype) => ({ name: archetype.name, percentage: 0 }));
         }
 
-        // Apply scaling factor for the top archetype
-        const topArchetype = sortedArchetypes[0];
-        const scalingFactor = 1.5; // Boost the top archetype’s score by 1.5x
-        topArchetype.score *= scalingFactor;
-
-        // Recalculate total score with the boosted top archetype
-        const boostedTotalScore = sortedArchetypes.reduce((sum, archetype) => sum + archetype.score, 0);
-
-        // Calculate percentages based on boosted scores
-        const finalPercentages = sortedArchetypes.map((archetype) => ({
+        // Normalize percentages based on total score
+        let finalPercentages = archetypeScores.map((archetype) => ({
             name: archetype.name,
-            percentage: Math.round((archetype.score / boostedTotalScore) * 100),
+            percentage: Math.round((archetype.score / totalScore) * 100),
         }));
 
-        // Log the percentage correlation for each archetype
         console.log("Archetype Correlations:", finalPercentages);
 
         return finalPercentages;
