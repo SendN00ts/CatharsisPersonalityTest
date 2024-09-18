@@ -156,11 +156,11 @@ export function usePersonalityTest() {
 
         function getTraitMatchScore(traitScore, traitThreshold) {
             if (traitThreshold === "high") {
-                return traitScore >= thresholds.high ? 1 : 0;  // "High" is above 75% of the range
+                return traitScore >= thresholds.high ? 1 : 0;
             } else if (traitThreshold === "moderate") {
-                return traitScore >= thresholds.moderateLow && traitScore <= thresholds.moderateHigh ? 1 : 0;  // "Moderate" includes neutral range
+                return traitScore >= thresholds.moderateLow && traitScore <= thresholds.moderateHigh ? 1 : 0;
             } else if (traitThreshold === "low") {
-                return traitScore <= thresholds.low ? 1 : 0;  // "Low" is below 25% of the range
+                return traitScore <= thresholds.low ? 1 : 0;
             } else if (traitThreshold === "lowOrHigh") {
                 return traitScore <= thresholds.low || traitScore >= thresholds.high ? 1 : 0;
             } else if (traitThreshold === "moderateToHigh") {
@@ -202,18 +202,35 @@ export function usePersonalityTest() {
             percentage: Math.round((archetype.score / totalScore) * 100),
         }));
 
-        // Ensure percentages sum to exactly 100%
-        const totalPercentage = finalPercentages.reduce((sum, archetype) => sum + archetype.percentage, 0);
+        // Boost the top archetype if it dominates
+        const topArchetype = finalPercentages[0];
+        if (topArchetype.percentage >= 40) {
+            topArchetype.percentage = Math.min(topArchetype.percentage + 15, 90); // Cap at 90%
+        }
+
+        // Recalculate remaining archetypes to adjust for the boosted top one
+        const remainingScore = 100 - topArchetype.percentage;
+        const remainingArchetypes = finalPercentages.slice(1);
+        const remainingTotal = remainingArchetypes.reduce((sum, archetype) => sum + archetype.percentage, 0);
+
+        if (remainingTotal > 0) {
+            remainingArchetypes.forEach((archetype) => {
+                archetype.percentage = Math.round((archetype.percentage / remainingTotal) * remainingScore);
+            });
+        }
+
+        // Ensure the percentages sum to exactly 100%
+        const totalPercentage = [topArchetype, ...remainingArchetypes].reduce((sum, a) => sum + a.percentage, 0);
         const difference = 100 - totalPercentage;
 
         if (difference !== 0) {
-            finalPercentages[0].percentage += difference; // Adjust for rounding differences
+            topArchetype.percentage += difference; // Adjust for rounding differences
         }
 
         // Log the percentage correlation for each archetype
-        console.log("Archetype Correlations:", finalPercentages);
+        console.log("Archetype Correlations:", [topArchetype, ...remainingArchetypes]);
 
-        return finalPercentages;
+        return [topArchetype, ...remainingArchetypes];
     }
 
     return {
