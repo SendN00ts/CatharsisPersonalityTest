@@ -196,31 +196,25 @@ export function usePersonalityTest() {
             return archetypes.map((archetype) => ({ name: archetype.name, percentage: 0 }));
         }
 
-        // Calculate pure percentages for each archetype
+        // Calculate pure percentages for each archetype based on score dominance
         const finalPercentages = sortedArchetypes.map((archetype) => ({
             name: archetype.name,
-            percentage: Math.round((archetype.score / totalScore) * 100),
+            percentage: (archetype.score / totalScore) * 100,
         }));
 
-        // Boost the top archetype if it dominates
+        // ** Boost Top Archetype if the gap is significant **
         const topArchetype = finalPercentages[0];
-        if (topArchetype.percentage >= 40) {
-            topArchetype.percentage = Math.min(topArchetype.percentage + 15, 90); // Cap at 90%
+        const secondArchetype = finalPercentages[1];
+
+        // Boost the top archetype if the difference is significant
+        const scoreDifference = topArchetype.percentage - secondArchetype.percentage;
+        if (scoreDifference > 15) {
+            topArchetype.percentage += 10; // Boost top by 10%
+            secondArchetype.percentage -= 5; // Reduce second by 5%
         }
 
-        // Recalculate remaining archetypes to adjust for the boosted top one
-        const remainingScore = 100 - topArchetype.percentage;
-        const remainingArchetypes = finalPercentages.slice(1);
-        const remainingTotal = remainingArchetypes.reduce((sum, archetype) => sum + archetype.percentage, 0);
-
-        if (remainingTotal > 0) {
-            remainingArchetypes.forEach((archetype) => {
-                archetype.percentage = Math.round((archetype.percentage / remainingTotal) * remainingScore);
-            });
-        }
-
-        // Ensure the percentages sum to exactly 100%
-        const totalPercentage = [topArchetype, ...remainingArchetypes].reduce((sum, a) => sum + a.percentage, 0);
+        // Ensure the percentages add to 100%
+        const totalPercentage = finalPercentages.reduce((sum, archetype) => sum + archetype.percentage, 0);
         const difference = 100 - totalPercentage;
 
         if (difference !== 0) {
@@ -228,9 +222,9 @@ export function usePersonalityTest() {
         }
 
         // Log the percentage correlation for each archetype
-        console.log("Archetype Correlations:", [topArchetype, ...remainingArchetypes]);
+        console.log("Archetype Correlations:", finalPercentages);
 
-        return [topArchetype, ...remainingArchetypes];
+        return finalPercentages;
     }
 
     return {
