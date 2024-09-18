@@ -12,24 +12,31 @@ export function usePersonalityTest() {
     });
 
     const handleAnswer = (questionIndex, newValue) => {
+        console.log(`Question Index: ${questionIndex + 1} - "New Value:"`, newValue);
+
         // Ensure the value is within the acceptable range (-3 to 3)
         if (newValue < -3 || newValue > 3) {
             console.error(`Invalid value received for question ${questionIndex + 1}:`, newValue);
             return;
         }
 
-        const previousAnswer = answers[questionIndex]; 
+        const previousAnswer = answers[questionIndex]; // Get the previous answer for the question
         const newAnswers = [...answers];
-        newAnswers[questionIndex] = newValue;
-        setAnswers(newAnswers);
+        newAnswers[questionIndex] = newValue; // Update the new answer
+        setAnswers(newAnswers); // Save the updated answers
 
-        updateTraits(questionIndex, newValue, previousAnswer); 
+        updateTraits(questionIndex, newValue, previousAnswer); // Pass both new and previous answer to update traits
     };
 
     const updateTraits = (questionIndex, newValue, previousValue) => {
+        console.log(`Before updating traits for question ${questionIndex + 1}:`, traits);
+
         const updatedTraits = { ...traits };
+
+        // Use previous value if it exists
         const normalizedPreviousValue = previousValue !== null ? previousValue : 0;
 
+        // Update traits based on the question range (0-9 Openness, 10-19 Conscientiousness, etc.)
         if (questionIndex >= 0 && questionIndex <= 9) {
             updatedTraits.Openness += newValue - normalizedPreviousValue;
         } else if (questionIndex >= 10 && questionIndex <= 19) {
@@ -42,11 +49,27 @@ export function usePersonalityTest() {
             updatedTraits.Neuroticism += newValue - normalizedPreviousValue;
         }
 
-        setTraits(updatedTraits);
+        setTraits(updatedTraits); // Save the updated traits
+        console.log(`After updating traits for question ${questionIndex + 1}:`, updatedTraits);
     };
 
     function calculateResults() {
         const { Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism } = traits;
+
+        // Define total questions per trait
+        const totalQuestionsPerTrait = 10;
+        const maxScorePerTrait = totalQuestionsPerTrait * 3;
+        const minScorePerTrait = totalQuestionsPerTrait * -3;
+
+        // Define thresholds for matching
+        const getThresholds = (minScore, maxScore) => ({
+            low: minScore + (maxScore - minScore) * 0.25,
+            high: minScore + (maxScore - minScore) * 0.75,
+            moderateLow: minScore + (maxScore - minScore) * 0.25,
+            moderateHigh: minScore + (maxScore - minScore) * 0.75
+        });
+
+        const thresholds = getThresholds(minScorePerTrait, maxScorePerTrait);
 
         const archetypes = [
             {
@@ -131,42 +154,60 @@ export function usePersonalityTest() {
             },
         ];
 
-        // Calculate a match score for each archetype
+        // Adjusted trait matching logic with additional weighting
+        function getTraitMatchScore(traitScore, traitThreshold) {
+            if (traitThreshold === "high") {
+                return traitScore >= thresholds.high ? 3 : traitScore >= thresholds.moderateHigh ? 2 : traitScore >= thresholds.moderateLow ? 1 : 0;
+            } else if (traitThreshold === "moderate") {
+                return traitScore >= thresholds.moderateLow && traitScore <= thresholds.moderateHigh ? 2 : 1;
+            } else if (traitThreshold === "low") {
+                return traitScore <= thresholds.low ? 3 : traitScore <= thresholds.moderateLow ? 2 : traitScore <= thresholds.moderateHigh ? 1 : 0;
+            } else if (traitThreshold === "lowOrHigh") {
+                return traitScore <= thresholds.low || traitScore >= thresholds.high ? 3 : 1;
+            } else if (traitThreshold === "moderateToHigh") {
+                return traitScore >= thresholds.moderateLow ? 2 : 1;
+            } else if (traitThreshold === "lowToModerate") {
+                return traitScore <= thresholds.moderateHigh ? 2 : 1;
+            }
+            return 0;
+        }
+
+        // Calculate the match score for each archetype
         const archetypeScores = archetypes.map((archetype) => {
             const thresholds = archetype.thresholds;
 
             const score =
-                (Openness >= 4 && thresholds.Openness === "high" ? 2 : Openness <= 2 && thresholds.Openness === "low" ? 2 : Openness === 3 && thresholds.Openness === "moderate" ? 1 : 0) +
-                (Conscientiousness >= 4 && thresholds.Conscientiousness === "high" ? 2 : Conscientiousness <= 2 && thresholds.Conscientiousness === "low" ? 2 : Conscientiousness === 3 && thresholds.Conscientiousness === "moderate" ? 1 : 0) +
-                (Extraversion >= 4 && thresholds.Extraversion === "high" ? 2 : Extraversion <= 2 && thresholds.Extraversion === "low" ? 2 : Extraversion === 3 && thresholds.Extraversion === "moderate" ? 1 : 0) +
-                (Agreeableness >= 4 && thresholds.Agreeableness === "high" ? 2 : Agreeableness <= 2 && thresholds.Agreeableness === "low" ? 2 : Agreeableness === 3 && thresholds.Agreeableness === "moderate" ? 1 : 0) +
-                (Neuroticism >= 4 && thresholds.Neuroticism === "high" ? 2 : Neuroticism <= 2 && thresholds.Neuroticism === "low" ? 2 : Neuroticism === 3 && thresholds.Neuroticism === "moderate" ? 1 : 0);
+                getTraitMatchScore(Openness, thresholds.Openness) +
+                getTraitMatchScore(Conscientiousness, thresholds.Conscientiousness) +
+                getTraitMatchScore(Extraversion, thresholds.Extraversion) +
+                getTraitMatchScore(Agreeableness, thresholds.Agreeableness) +
+                getTraitMatchScore(Neuroticism, thresholds.Neuroticism);
 
             return { name: archetype.name, score };
         });
 
-        // Sort archetypes by score in descending order
+        // Sort the archetypes by score in descending order
         const sortedArchetypes = archetypeScores.sort((a, b) => b.score - a.score);
 
-        // Normalize the scores by adjusting the scaling
+        // Find the total score to normalize percentages
         const totalScore = sortedArchetypes.reduce((sum, archetype) => sum + archetype.score, 0);
 
-        // If the total score is 0 (no correlation), return 0% for all archetypes
         if (totalScore === 0) {
-            return archetypes.map((archetype) => ({ name: archetype.name, percentage: 0 }));
+            return sortedArchetypes.map((archetype) => ({
+                name: archetype.name,
+                percentage: 0
+            }));
         }
 
-        // Weighted scaling: top archetype will dominate but others still get their share
-        const weightedPercentages = sortedArchetypes.map(archetype => {
-            return {
-                name: archetype.name,
-                percentage: Math.round((archetype.score / totalScore) * 100) // Scale the scores to percentages
-            };
-        });
+        // Calculate percentages based on scores
+        const archetypePercentages = sortedArchetypes.map((archetype) => ({
+            name: archetype.name,
+            percentage: Math.round((archetype.score / totalScore) * 100)
+        }));
 
-        console.log("Final archetype percentages:", weightedPercentages);
+        console.log("Archetype Correlations:", archetypePercentages);
 
-        return weightedPercentages;
+        return archetypePercentages;
     }
 
     return {
