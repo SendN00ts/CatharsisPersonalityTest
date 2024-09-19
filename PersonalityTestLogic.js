@@ -81,6 +81,7 @@ export function usePersonalityTest() {
                     Agreeableness: "high",
                     Neuroticism: "high",
                 },
+                url: "https://tiny-slides-700893.framer.app/resultlabyrinthos",
             },
             {
                 name: "Shield",
@@ -91,6 +92,7 @@ export function usePersonalityTest() {
                     Agreeableness: "moderateToHigh",
                     Neuroticism: "low",
                 },
+                url: "https://tiny-slides-700893.framer.app/resultaspida",
             },
             {
                 name: "Helm",
@@ -101,6 +103,7 @@ export function usePersonalityTest() {
                     Agreeableness: "moderate",
                     Neuroticism: "low",
                 },
+                url: "https://tiny-slides-700893.framer.app/resultkyvernitis",
             },
             {
                 name: "Olive Branch",
@@ -111,6 +114,7 @@ export function usePersonalityTest() {
                     Agreeableness: "high",
                     Neuroticism: "low",
                 },
+                url: "https://tiny-slides-700893.framer.app/resultkladoselaias",
             },
             {
                 name: "Papyros",
@@ -121,6 +125,7 @@ export function usePersonalityTest() {
                     Agreeableness: "lowToModerate",
                     Neuroticism: "moderateToHigh",
                 },
+                url: "https://tiny-slides-700893.framer.app/resultpapyros",
             },
             {
                 name: "Lyra",
@@ -131,6 +136,7 @@ export function usePersonalityTest() {
                     Agreeableness: "high",
                     Neuroticism: "low",
                 },
+                url: "https://tiny-slides-700893.framer.app/resultlyra",
             },
             {
                 name: "Dory",
@@ -141,6 +147,7 @@ export function usePersonalityTest() {
                     Agreeableness: "low",
                     Neuroticism: "lowToModerate",
                 },
+                url: "https://tiny-slides-700893.framer.app/resultdory",
             },
             {
                 name: "Estia",
@@ -151,6 +158,7 @@ export function usePersonalityTest() {
                     Agreeableness: "moderateToHigh",
                     Neuroticism: "low",
                 },
+                url: "https://tiny-slides-700893.framer.app/resultestia",
             },
         ];
 
@@ -183,31 +191,21 @@ export function usePersonalityTest() {
                 getTraitMatchScore(Agreeableness, thresholds.Agreeableness) +
                 getTraitMatchScore(Neuroticism, thresholds.Neuroticism);
 
-            return { name: archetype.name, score };
+            return { name: archetype.name, score, url: archetype.url };
         });
 
         // Sort the archetypes by score in descending order
         const sortedArchetypes = archetypeScores.sort((a, b) => b.score - a.score);
 
-        // Find the total score to normalize percentages
-        const totalScore = sortedArchetypes.reduce((sum, archetype) => sum + archetype.score, 0);
+        // Find the top archetype
+        const topArchetype = sortedArchetypes[0];
 
-        if (totalScore === 0) {
-            return sortedArchetypes.map((archetype) => ({
-                name: archetype.name,
-                percentage: 0
-            }));
+        // Redirect to the corresponding URL for the top archetype
+        if (topArchetype && topArchetype.url) {
+            window.location.href = topArchetype.url;
         }
 
-        // Calculate percentages based on scores
-        const archetypePercentages = sortedArchetypes.map((archetype) => ({
-            name: archetype.name,
-            percentage: Math.round((archetype.score / totalScore) * 100)
-        }));
-
-        console.log("Archetype Correlations:", archetypePercentages);
-
-        return archetypePercentages;
+        return sortedArchetypes;
     }
 
     return {
