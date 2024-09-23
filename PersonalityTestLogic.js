@@ -18,7 +18,7 @@ function calculateResults() {
 
     const archetypes = [
         {
-            name: "Labyrinth",
+            name: "Labyrinthos",
             thresholds: {
                 Openness: "high",
                 Conscientiousness: "low",
@@ -29,7 +29,7 @@ function calculateResults() {
             url: "https://tiny-slides-700893.framer.app/resultlabyrinthos",
         },
         {
-            name: "Shield",
+            name: "Aspida",
             thresholds: {
                 Openness: "low",
                 Conscientiousness: "high",
@@ -40,7 +40,7 @@ function calculateResults() {
             url: "https://tiny-slides-700893.framer.app/resultaspida",
         },
         {
-            name: "Helm",
+            name: "Kyvernitis",
             thresholds: {
                 Openness: "high",
                 Conscientiousness: "high",
@@ -51,7 +51,7 @@ function calculateResults() {
             url: "https://tiny-slides-700893.framer.app/resultkyvernitis",
         },
         {
-            name: "Olive Branch",
+            name: "Klados Elaias",
             thresholds: {
                 Openness: "moderate",
                 Conscientiousness: "high",
