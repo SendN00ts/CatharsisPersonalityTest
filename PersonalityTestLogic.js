@@ -92,7 +92,7 @@ export function usePersonalityTest() {
                     Agreeableness: "moderateToHigh",
                     Neuroticism: "low",
                 },
-                url: "https://tiny-slides-700893.framer.app/resultaspida",
+                url: "https://tiny-slides-700893.framer.app/genartaspida",
             },
             {
                 name: "Helm",
@@ -103,7 +103,7 @@ export function usePersonalityTest() {
                     Agreeableness: "moderate",
                     Neuroticism: "low",
                 },
-                url: "https://tiny-slides-700893.framer.app/resultkyvernitis",
+                url: "https://tiny-slides-700893.framer.app/genartkyvernitis",
             },
             {
                 name: "Olive Branch",
@@ -114,7 +114,7 @@ export function usePersonalityTest() {
                     Agreeableness: "high",
                     Neuroticism: "low",
                 },
-                url: "https://tiny-slides-700893.framer.app/resultkladoselaias",
+                url: "https://tiny-slides-700893.framer.app/genartkladoselaias",
             },
             {
                 name: "Papyros",
@@ -125,7 +125,7 @@ export function usePersonalityTest() {
                     Agreeableness: "lowToModerate",
                     Neuroticism: "moderateToHigh",
                 },
-                url: "https://tiny-slides-700893.framer.app/resultpapyros",
+                url: "https://tiny-slides-700893.framer.app/genartpapyros",
             },
             {
                 name: "Lyra",
@@ -136,7 +136,7 @@ export function usePersonalityTest() {
                     Agreeableness: "high",
                     Neuroticism: "low",
                 },
-                url: "https://tiny-slides-700893.framer.app/resultlyra",
+                url: "https://tiny-slides-700893.framer.app/genartlyra",
             },
             {
                 name: "Dory",
@@ -147,7 +147,7 @@ export function usePersonalityTest() {
                     Agreeableness: "low",
                     Neuroticism: "lowToModerate",
                 },
-                url: "https://tiny-slides-700893.framer.app/resultdory",
+                url: "https://tiny-slides-700893.framer.app/genartdory",
             },
             {
                 name: "Estia",
@@ -158,7 +158,7 @@ export function usePersonalityTest() {
                     Agreeableness: "moderateToHigh",
                     Neuroticism: "low",
                 },
-                url: "https://tiny-slides-700893.framer.app/resultestia",
+                url: "https://tiny-slides-700893.framer.app/genartestia",
             },
         ];
 
