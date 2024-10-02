@@ -73,7 +73,7 @@ export function usePersonalityTest() {
 
         const archetypes = [
             {
-                name: "Labyrinth",
+                name: "Labyrinthos",
                 thresholds: {
                     Openness: "high",
                     Conscientiousness: "low",
@@ -84,7 +84,7 @@ export function usePersonalityTest() {
                 url: "https://tiny-slides-700893.framer.app/resultlabyrinthos",
             },
             {
-                name: "Shield",
+                name: "Aspida",
                 thresholds: {
                     Openness: "low",
                     Conscientiousness: "high",
@@ -95,7 +95,7 @@ export function usePersonalityTest() {
                 url: "https://tiny-slides-700893.framer.app/genartaspida",
             },
             {
-                name: "Helm",
+                name: "Kyvernitis",
                 thresholds: {
                     Openness: "high",
                     Conscientiousness: "high",
@@ -106,7 +106,7 @@ export function usePersonalityTest() {
                 url: "https://tiny-slides-700893.framer.app/genartkyvernitis",
             },
             {
-                name: "Olive Branch",
+                name: "Klados Elaias",
                 thresholds: {
                     Openness: "moderate",
                     Conscientiousness: "high",
