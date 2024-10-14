@@ -1,7 +1,8 @@
 import { useState } from 'react';
 
+// Hook: Personality Test Logic
 export function usePersonalityTest() {
-    const [answers, setAnswers] = useState(Array(50).fill(null)); 
+    const [answers, setAnswers] = useState(Array(50).fill(null)); // 50 questions
     const [traits, setTraits] = useState({
         Openness: 0,
         Conscientiousness: 0,
@@ -11,10 +12,10 @@ export function usePersonalityTest() {
     });
 
     const handleAnswer = (questionIndex, newValue) => {
-        const previousAnswer = answers[questionIndex];
+        const previousAnswer = answers[questionIndex]; 
         const newAnswers = [...answers];
         newAnswers[questionIndex] = newValue; 
-        setAnswers(newAnswers);
+        setAnswers(newAnswers); 
         updateTraits(questionIndex, newValue, previousAnswer); 
     };
 
@@ -94,11 +95,11 @@ export function usePersonalityTest() {
             return { name: archetype.name, score, url: archetype.url };
         });
 
-        const maxScore = 15;
-        const topScore = Math.max(...archetypeScores.map((archetype) => archetype.score));
+        const maxPossibleScore = 15; // Max score across all traits for each archetype
+        const totalScores = archetypeScores.reduce((sum, archetype) => sum + archetype.score, 0);
 
         const archetypePercentages = archetypeScores.map((archetype) => {
-            const percentage = Math.round((archetype.score / maxScore) * 100);
+            const percentage = Math.round((archetype.score / totalScores) * 100);
             return { ...archetype, percentage };
         });
 
