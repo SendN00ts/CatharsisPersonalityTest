@@ -13,6 +13,7 @@ export function usePersonalityTest() {
 
     const handleAnswer = (questionIndex, newValue) => {
         console.log(`Question Index: ${questionIndex + 1} - "New Value:"`, newValue);
+
         const previousAnswer = answers[questionIndex]; 
         const newAnswers = [...answers];
         newAnswers[questionIndex] = newValue;
@@ -43,21 +44,6 @@ export function usePersonalityTest() {
     function calculateResults() {
         const { Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism } = traits;
 
-        // Define total questions per trait
-        const totalQuestionsPerTrait = 10;
-        const maxScorePerTrait = totalQuestionsPerTrait * 3; // The highest possible score for each trait
-        const minScorePerTrait = totalQuestionsPerTrait * -3; // The lowest possible score for each trait
-
-        console.log("Max/Min scores per trait: ", { maxScorePerTrait, minScorePerTrait });
-
-        const getThresholds = (minScore, maxScore) => ({
-            low: minScore + (maxScore - minScore) * 0.25,
-            high: minScore + (maxScore - minScore) * 0.75,
-        });
-
-        const thresholds = getThresholds(minScorePerTrait, maxScorePerTrait);
-        console.log("Thresholds: ", thresholds);
-
         const archetypes = [
             { name: "Labyrinthos", thresholds: { Openness: "high", Conscientiousness: "low", Extraversion: "lowOrHigh", Agreeableness: "high", Neuroticism: "high" } },
             { name: "Aspida", thresholds: { Openness: "low", Conscientiousness: "high", Extraversion: "low", Agreeableness: "moderateToHigh", Neuroticism: "low" } },
@@ -71,13 +57,13 @@ export function usePersonalityTest() {
 
         function getTraitMatchScore(traitScore, traitThreshold) {
             if (traitThreshold === "high") {
-                return traitScore >= thresholds.high ? 3 : traitScore >= thresholds.low ? 1 : 0;
+                return traitScore >= 7.5 ? 3 : traitScore >= 5 ? 2 : 1;
             } else if (traitThreshold === "low") {
-                return traitScore <= thresholds.low ? 3 : traitScore <= thresholds.high ? 1 : 0;
+                return traitScore <= 2.5 ? 3 : traitScore <= 5 ? 2 : 1;
             } else if (traitThreshold === "lowOrHigh") {
-                return traitScore <= thresholds.low || traitScore >= thresholds.high ? 3 : 1;
+                return traitScore <= 2.5 || traitScore >= 7.5 ? 3 : 1;
             } else if (traitThreshold === "moderate") {
-                return traitScore > thresholds.low && traitScore < thresholds.high ? 2 : 0;
+                return traitScore > 2.5 && traitScore < 7.5 ? 2 : 1;
             }
             return 0;
         }
@@ -97,14 +83,13 @@ export function usePersonalityTest() {
             return { name: archetype.name, score };
         });
 
-        // Define the maximum possible score for any single archetype
-        const maxPossibleScore = 5 * 3; // 5 traits, each maxing at 3 points
-
-        console.log("Max Possible Score:", maxPossibleScore);
+        // Scale up percentages
+        const maxScore = Math.max(...archetypeScores.map(a => a.score));
+        const minScore = Math.min(...archetypeScores.map(a => a.score));
 
         const archetypePercentages = archetypeScores.map((archetype) => {
-            const percentage = Math.round((archetype.score / maxPossibleScore) * 100);
-            return { ...archetype, percentage };
+            const scaledPercentage = ((archetype.score - minScore) / (maxScore - minScore)) * 50 + 50;
+            return { ...archetype, percentage: Math.round(scaledPercentage) };
         });
 
         const sortedArchetypes = archetypePercentages.sort((a, b) => b.percentage - a.percentage);
