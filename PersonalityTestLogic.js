@@ -1,8 +1,7 @@
 import { useState } from 'react';
 
-// Hook: Personality Test Logic
 export function usePersonalityTest() {
-    const [answers, setAnswers] = useState(Array(50).fill(null)); // 50 questions
+    const [answers, setAnswers] = useState(Array(50).fill(null)); 
     const [traits, setTraits] = useState({
         Openness: 0,
         Conscientiousness: 0,
@@ -12,31 +11,17 @@ export function usePersonalityTest() {
     });
 
     const handleAnswer = (questionIndex, newValue) => {
-        console.log(`Question Index: ${questionIndex + 1} - "New Value:"`, newValue);
-
-        // Ensure the value is within the acceptable range (-3 to 3)
-        if (newValue < -3 || newValue > 3) {
-            console.error(`Invalid value received for question ${questionIndex + 1}:`, newValue);
-            return;
-        }
-
-        const previousAnswer = answers[questionIndex]; // Get the previous answer for the question
+        const previousAnswer = answers[questionIndex];
         const newAnswers = [...answers];
-        newAnswers[questionIndex] = newValue; // Update the new answer
-        setAnswers(newAnswers); // Save the updated answers
-
-        updateTraits(questionIndex, newValue, previousAnswer); // Pass both new and previous answer to update traits
+        newAnswers[questionIndex] = newValue; 
+        setAnswers(newAnswers);
+        updateTraits(questionIndex, newValue, previousAnswer); 
     };
 
     const updateTraits = (questionIndex, newValue, previousValue) => {
-        console.log(`Before updating traits for question ${questionIndex + 1}:`, traits);
-
         const updatedTraits = { ...traits };
-
-        // Use previous value if it exists
         const normalizedPreviousValue = previousValue !== null ? previousValue : 0;
 
-        // Update traits based on the question range (0-9 Openness, 10-19 Conscientiousness, etc.)
         if (questionIndex >= 0 && questionIndex <= 9) {
             updatedTraits.Openness += newValue - normalizedPreviousValue;
         } else if (questionIndex >= 10 && questionIndex <= 19) {
@@ -49,19 +34,16 @@ export function usePersonalityTest() {
             updatedTraits.Neuroticism += newValue - normalizedPreviousValue;
         }
 
-        setTraits(updatedTraits); // Save the updated traits
-        console.log(`After updating traits for question ${questionIndex + 1}:`, updatedTraits);
+        setTraits(updatedTraits);
     };
 
     function calculateResults() {
         const { Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism } = traits;
 
-        // Define total questions per trait
         const totalQuestionsPerTrait = 10;
         const maxScorePerTrait = totalQuestionsPerTrait * 3;
         const minScorePerTrait = totalQuestionsPerTrait * -3;
 
-        // Define thresholds for matching
         const getThresholds = (minScore, maxScore) => ({
             low: minScore + (maxScore - minScore) * 0.25,
             high: minScore + (maxScore - minScore) * 0.75,
@@ -72,97 +54,16 @@ export function usePersonalityTest() {
         const thresholds = getThresholds(minScorePerTrait, maxScorePerTrait);
 
         const archetypes = [
-            {
-                name: "Labyrinthos",
-                thresholds: {
-                    Openness: "high",
-                    Conscientiousness: "low",
-                    Extraversion: "lowOrHigh",
-                    Agreeableness: "high",
-                    Neuroticism: "high",
-                },
-                url: "https://tiny-slides-700893.framer.app/resultlabyrinthos",
-            },
-            {
-                name: "Aspida",
-                thresholds: {
-                    Openness: "low",
-                    Conscientiousness: "high",
-                    Extraversion: "low",
-                    Agreeableness: "moderateToHigh",
-                    Neuroticism: "low",
-                },
-                url: "https://tiny-slides-700893.framer.app/genartaspida",
-            },
-            {
-                name: "Kyvernitis",
-                thresholds: {
-                    Openness: "high",
-                    Conscientiousness: "high",
-                    Extraversion: "high",
-                    Agreeableness: "moderate",
-                    Neuroticism: "low",
-                },
-                url: "https://tiny-slides-700893.framer.app/genartkyvernitis",
-            },
-            {
-                name: "Klados Elaias",
-                thresholds: {
-                    Openness: "moderate",
-                    Conscientiousness: "high",
-                    Extraversion: "high",
-                    Agreeableness: "high",
-                    Neuroticism: "low",
-                },
-                url: "https://tiny-slides-700893.framer.app/genartkladoselaias",
-            },
-            {
-                name: "Papyros",
-                thresholds: {
-                    Openness: "high",
-                    Conscientiousness: "low",
-                    Extraversion: "low",
-                    Agreeableness: "lowToModerate",
-                    Neuroticism: "moderateToHigh",
-                },
-                url: "https://tiny-slides-700893.framer.app/genartpapyros",
-            },
-            {
-                name: "Lyra",
-                thresholds: {
-                    Openness: "moderate",
-                    Conscientiousness: "moderate",
-                    Extraversion: "high",
-                    Agreeableness: "high",
-                    Neuroticism: "low",
-                },
-                url: "https://tiny-slides-700893.framer.app/genartlyra",
-            },
-            {
-                name: "Dory",
-                thresholds: {
-                    Openness: "low",
-                    Conscientiousness: "moderateToHigh",
-                    Extraversion: "high",
-                    Agreeableness: "low",
-                    Neuroticism: "lowToModerate",
-                },
-                url: "https://tiny-slides-700893.framer.app/genartdory",
-            },
-            {
-                name: "Estia",
-                thresholds: {
-                    Openness: "low",
-                    Conscientiousness: "low",
-                    Extraversion: "low",
-                    Agreeableness: "moderateToHigh",
-                    Neuroticism: "low",
-                },
-                url: "https://tiny-slides-700893.framer.app/genartestia",
-            },
+            { name: "Labyrinthos", thresholds: { Openness: "high", Conscientiousness: "low", Extraversion: "lowOrHigh", Agreeableness: "high", Neuroticism: "high" } },
+            { name: "Aspida", thresholds: { Openness: "low", Conscientiousness: "high", Extraversion: "low", Agreeableness: "moderateToHigh", Neuroticism: "low" } },
+            { name: "Kyvernitis", thresholds: { Openness: "high", Conscientiousness: "high", Extraversion: "high", Agreeableness: "moderate", Neuroticism: "low" } },
+            { name: "Klados Elaias", thresholds: { Openness: "moderate", Conscientiousness: "high", Extraversion: "high", Agreeableness: "high", Neuroticism: "low" } },
+            { name: "Papyros", thresholds: { Openness: "high", Conscientiousness: "low", Extraversion: "low", Agreeableness: "lowToModerate", Neuroticism: "moderateToHigh" } },
+            { name: "Lyra", thresholds: { Openness: "moderate", Conscientiousness: "moderate", Extraversion: "high", Agreeableness: "high", Neuroticism: "low" } },
+            { name: "Dory", thresholds: { Openness: "low", Conscientiousness: "moderateToHigh", Extraversion: "high", Agreeableness: "low", Neuroticism: "lowToModerate" } },
+            { name: "Estia", thresholds: { Openness: "low", Conscientiousness: "low", Extraversion: "low", Agreeableness: "moderateToHigh", Neuroticism: "low" } },
         ];
 
-        // Adjusted trait matching logic with additional weighting
         function getTraitMatchScore(traitScore, traitThreshold) {
             if (traitThreshold === "high") {
                 return traitScore >= thresholds.high ? 3 : traitScore >= thresholds.moderateHigh ? 2 : traitScore >= thresholds.moderateLow ? 1 : 0;
@@ -180,7 +81,6 @@ export function usePersonalityTest() {
             return 0;
         }
 
-        // Calculate the match score for each archetype
         const archetypeScores = archetypes.map((archetype) => {
             const thresholds = archetype.thresholds;
 
@@ -194,16 +94,17 @@ export function usePersonalityTest() {
             return { name: archetype.name, score, url: archetype.url };
         });
 
-        // Sort the archetypes by score in descending order
-        const sortedArchetypes = archetypeScores.sort((a, b) => b.score - a.score);
+        const maxScore = 15;
+        const topScore = Math.max(...archetypeScores.map((archetype) => archetype.score));
 
-        // Find the top archetype
-        const topArchetype = sortedArchetypes[0];
+        const archetypePercentages = archetypeScores.map((archetype) => {
+            const percentage = Math.round((archetype.score / maxScore) * 100);
+            return { ...archetype, percentage };
+        });
 
-        // Redirect to the corresponding URL for the top archetype
-        if (topArchetype && topArchetype.url) {
-            window.location.href = topArchetype.url;
-        }
+        const sortedArchetypes = archetypePercentages.sort((a, b) => b.percentage - a.percentage);
+
+        console.log("Final Archetype Percentages: ", sortedArchetypes);
 
         return sortedArchetypes;
     }
