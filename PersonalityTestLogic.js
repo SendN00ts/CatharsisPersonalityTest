@@ -12,11 +12,12 @@ export function usePersonalityTest() {
     });
 
     const handleAnswer = (questionIndex, newValue) => {
+        console.log(`Question Index: ${questionIndex + 1} - "New Value:"`, newValue);
         const previousAnswer = answers[questionIndex]; 
         const newAnswers = [...answers];
-        newAnswers[questionIndex] = newValue; 
+        newAnswers[questionIndex] = newValue;
         setAnswers(newAnswers); 
-        updateTraits(questionIndex, newValue, previousAnswer); 
+        updateTraits(questionIndex, newValue, previousAnswer);
     };
 
     const updateTraits = (questionIndex, newValue, previousValue) => {
@@ -36,15 +37,20 @@ export function usePersonalityTest() {
         }
 
         setTraits(updatedTraits);
+        console.log(`Updated Traits:`, updatedTraits); // Log the updated traits after each answer
     };
 
     function calculateResults() {
         const { Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism } = traits;
 
+        // Define total questions per trait
         const totalQuestionsPerTrait = 10;
         const maxScorePerTrait = totalQuestionsPerTrait * 3;
         const minScorePerTrait = totalQuestionsPerTrait * -3;
 
+        console.log("Max/Min scores per trait: ", { maxScorePerTrait, minScorePerTrait }); // Log trait score ranges
+
+        // Define thresholds for matching
         const getThresholds = (minScore, maxScore) => ({
             low: minScore + (maxScore - minScore) * 0.25,
             high: minScore + (maxScore - minScore) * 0.75,
@@ -53,6 +59,7 @@ export function usePersonalityTest() {
         });
 
         const thresholds = getThresholds(minScorePerTrait, maxScorePerTrait);
+        console.log("Thresholds: ", thresholds); // Log calculated thresholds
 
         const archetypes = [
             { name: "Labyrinthos", thresholds: { Openness: "high", Conscientiousness: "low", Extraversion: "lowOrHigh", Agreeableness: "high", Neuroticism: "high" } },
@@ -92,11 +99,14 @@ export function usePersonalityTest() {
                 getTraitMatchScore(Agreeableness, thresholds.Agreeableness) +
                 getTraitMatchScore(Neuroticism, thresholds.Neuroticism);
 
-            return { name: archetype.name, score, url: archetype.url };
+            console.log(`${archetype.name} Score: `, score); // Log each archetype score
+
+            return { name: archetype.name, score };
         });
 
-        const maxPossibleScore = 15; // Max score across all traits for each archetype
         const totalScores = archetypeScores.reduce((sum, archetype) => sum + archetype.score, 0);
+
+        console.log("Total Scores: ", totalScores); // Log the total score across all archetypes
 
         const archetypePercentages = archetypeScores.map((archetype) => {
             const percentage = Math.round((archetype.score / totalScores) * 100);
@@ -105,7 +115,7 @@ export function usePersonalityTest() {
 
         const sortedArchetypes = archetypePercentages.sort((a, b) => b.percentage - a.percentage);
 
-        console.log("Final Archetype Percentages: ", sortedArchetypes);
+        console.log("Final Archetype Percentages: ", sortedArchetypes); // Log the final archetype percentages
 
         return sortedArchetypes;
     }
