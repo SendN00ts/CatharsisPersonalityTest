@@ -12,8 +12,6 @@ export function usePersonalityTest() {
     });
 
     const handleAnswer = (questionIndex, newValue) => {
-        console.log(`Question Index: ${questionIndex + 1} - "New Value:"`, newValue);
-
         const previousAnswer = answers[questionIndex]; 
         const newAnswers = [...answers];
         newAnswers[questionIndex] = newValue;
@@ -38,7 +36,6 @@ export function usePersonalityTest() {
         }
 
         setTraits(updatedTraits);
-        console.log(`Updated Traits:`, updatedTraits);
     };
 
     function calculateResults() {
@@ -78,23 +75,26 @@ export function usePersonalityTest() {
                 getTraitMatchScore(Agreeableness, thresholds.Agreeableness) +
                 getTraitMatchScore(Neuroticism, thresholds.Neuroticism);
 
-            console.log(`${archetype.name} Score: `, score);
-
             return { name: archetype.name, score };
         });
 
-        // Scale up percentages
+        // Scaling Percentages: Normalize scores and scale up
         const maxScore = Math.max(...archetypeScores.map(a => a.score));
-        const minScore = Math.min(...archetypeScores.map(a => a.score));
+        const totalScore = archetypeScores.reduce((sum, archetype) => sum + archetype.score, 0);
 
-        const archetypePercentages = archetypeScores.map((archetype) => {
-            const scaledPercentage = ((archetype.score - minScore) / (maxScore - minScore)) * 50 + 50;
-            return { ...archetype, percentage: Math.round(scaledPercentage) };
+        const scaledPercentages = archetypeScores.map(archetype => {
+            const relativePercentage = (archetype.score / totalScore) * 100;
+            const scaledPercentage = (relativePercentage / maxScore) * 100; // Scale the percentages
+
+            return {
+                name: archetype.name,
+                percentage: Math.round(scaledPercentage)
+            };
         });
 
-        const sortedArchetypes = archetypePercentages.sort((a, b) => b.percentage - a.percentage);
+        const sortedArchetypes = scaledPercentages.sort((a, b) => b.percentage - a.percentage);
 
-        console.log("Final Archetype Percentages: ", sortedArchetypes);
+        console.log("Final Scaled Archetype Percentages: ", sortedArchetypes);
 
         return sortedArchetypes;
     }
